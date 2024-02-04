@@ -1,5 +1,8 @@
 #include "AudioServer.hpp"
 #include "Request.hpp"
+#include "nlohmann/json.hpp"
+
+using nlohmann::json;
 
 int main()
 {
@@ -11,15 +14,16 @@ int main()
 
 
         if (jsRequest["type"] == "CREATEROOM") {
-            if (audioServer.createRoom(jsRequest["uid"].get<int>())) {
-                response = "OK";
-            }
-            else {
-                response = audioServer.lastError;
-            }
+
+            int uid = jsRequest["uid"].get<int>();
+
+            audioServer.createRoom(uid);
+
             return;
         }
         else {
+            response = "lalalalal";
+
             return;
         }
 

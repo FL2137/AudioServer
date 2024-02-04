@@ -1,26 +1,26 @@
-#include <boost/asio.hpp>
-#include <boost/bind/bind.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <iostream>
-#include <functional>
-#include <string>
-#include "nlohmann/json.hpp"
-
-using nlohmann::json;
-using boost::asio::ip::tcp;
-using boost::asio::ip::udp;
+#include "AudioServer.hpp"
 
 
-class User {
-    tcp::endpoint tcpEndpoint;
-    udp::endpoint udpEndpoint;
-};
+bool AudioServer::createRoom(int uid) {
+	std::vector<User>::iterator iter;
 
-class Room {
-public:
+	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
+		User host = *iter;
+		std::cout << "uid:" << host.uid << std::endl;
 
-    Room(User &host) {
+		return true;
+	}
+	else {
+		lastError = "This user is not logged in";
+		return false;
+	}
+}
 
-    }
+bool AudioServer::userConnected(json userData) {
+	std::string nickname = userData["nickname"].get<std::string>();
+	std::string password = userData["passhash"].get<std::string>();
+	std::cout << "nick: " << nickname << " pass: " << password << std::endl;
 
-};
+	loggedUsers.push_back(User(nickname));
+	return true;
+}
