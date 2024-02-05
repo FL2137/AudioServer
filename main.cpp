@@ -10,22 +10,39 @@ int main()
 
     TcpServer::asyncServer("192.168.1.109", PORT, [&audioServer](std::string request, std::string& response) {
         std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
-        json jsRequest = request;
+        json jsRequest = json::parse(request);
+
+        std::cout << jsRequest["type"] << std::endl;
 
 
-        if (jsRequest["type"] == "CREATEROOM") {
+            if (jsRequest["type"] == "CREATEROOM") {
 
-            int uid = jsRequest["uid"].get<int>();
+                int uid = jsRequest["uid"].get<int>();
 
-            audioServer.createRoom(uid);
+                if (audioServer.createRoom(uid)) {
+                    response = "OK";
+                }
+                else {
+                    response = audioServer.lastError;
+                }
+                return;
+            }
+            else if(jsRequest["type"] == "LOGIN") {
+                std::cout << jsRequest["data"] << std::endl;
+                if (audioServer.userConnected(jsRequest["data"].get<json>())) {
+                    json js;
+                    js["ok"] = "OK";
+                    js["uid"] = audioServer.lastUid - 1;
+                    response = js.dump();
+                }
+                else {
+                    json js;
+                    js["ok"] = audioServer.lastError;
+                    response = js.dump();
+                }
 
-            return;
-        }
-        else {
-            response = "lalalalal";
-
-            return;
-        }
-
+                return;
+            }
+       
     });
 }

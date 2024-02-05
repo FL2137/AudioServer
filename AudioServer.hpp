@@ -10,12 +10,35 @@
 
 using nlohmann::json;
 
+class User;
+class Room;
+
+class AudioServer {
+public:
+    AudioServer() {
+        lastUid = 0;
+    }
+
+    bool userConnected(json userData);
+    bool createRoom(int uid);
+    bool joinRoom();
+
+    std::string lastError;
+
+    int lastUid;
+
+private:
+
+    std::vector<User> loggedUsers = {};
+    std::vector<Room> existingRooms = {};
+};
+
 class User {
 public:
 
-    User(std::string nickname) {
+    User(std::string nickname, int uid) {
         this->nickname = nickname;
-        this->uid = AudioServer::lastUid++;
+        this->uid = uid;
     }
 
     tcp::endpoint tcpEndpoint;
@@ -49,22 +72,3 @@ public:
     std::vector<User> users;
 };
 
-class AudioServer {
-public:
-    AudioServer() {
-        lastUid = 0;
-    }
-
-    bool userConnected(json userData);
-    bool createRoom(int uid);
-    bool joinRoom();
-
-    std::string lastError;
-
-    static int lastUid;
-
-private:
-
-    std::vector<User> loggedUsers = {};
-    std::vector<Room> existingRooms = {};
-};
