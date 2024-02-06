@@ -27,6 +27,19 @@ int main()
                 }
                 return;
             }
+            else if (jsRequest["type"] == "JOINROOM") {
+
+                int uid = jsRequest["uid"].get<int>();
+                int roomId = jsRequest["rid"].get<int>();
+
+                if (audioServer.joinRoom(roomId, uid)) {
+                    response = "OK";
+                }
+                else {
+                    response = audioServer.lastError;
+                }
+                return;
+            }
             else if(jsRequest["type"] == "LOGIN") {
                 std::cout << jsRequest["data"] << std::endl;
                 if (audioServer.userConnected(jsRequest["data"].get<json>())) {
