@@ -21,7 +21,7 @@ public:
 
     bool userConnected(json userData);
     bool createRoom(int uid);
-    bool joinRoom();
+    bool joinRoom(int roomId, int uid);
 
     std::string lastError;
 
@@ -67,7 +67,19 @@ public:
     int size;
 
     void kick(int uid);
-    void addUser(int uid);
+
+
+    inline void addUser(const User& user) {
+        users.push_back(user);
+    }
+
+    bool operator==(int rid) {
+        if (rid == this->id)
+            return true;
+        else
+            return false;
+    }
+
 
     std::vector<User> users;
 };
