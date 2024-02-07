@@ -56,6 +56,18 @@ int main()
 
                 return;
             }
+            else if (jsRequest["type"] == "QUITROOM") {
+                int uid = jsRequest["uid"].get<int>();
+                int roomId = jsRequest["rid"].get<int>();
+
+                if (audioServer.quitRoom(rid, uid)) {
+                    response = "OK";
+                }
+                else {
+                    response = audioServer.lastError;
+                }
+                return;
+            }
        
     });
 }
