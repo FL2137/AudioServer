@@ -66,8 +66,9 @@ public:
     int id;
     int size;
 
-    void kick(int uid);
-
+    inline void kick(int uid) {
+        users.erase(std::remove(users.begin(), users.end(), uid), users.end());
+    }
 
     inline void addUser(const User& user) {
         users.push_back(user);
