@@ -16,11 +16,12 @@ bool AudioServer::createRoom(int uid) {
 	}
 }
 
-bool AudioServer::userConnected(json userData) {
+bool AudioServer::userConnected(std::string userData) {
+	json data = json::parse(userData);
 
 	try {
-		std::string nickname = userData["nickname"].get<std::string>();
-		std::string password = userData["password"].get<std::string>();
+		std::string nickname = data["nickname"];
+		std::string password = data["password"];
 		std::cout << "nick: " << nickname << " pass: " << password << std::endl;
 		loggedUsers.push_back(User(nickname, lastUid++));
 	}

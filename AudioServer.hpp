@@ -19,7 +19,7 @@ public:
         lastUid = 0;
     }
 
-    bool userConnected(json userData);
+    bool userConnected(std::string userData);
     bool createRoom(int uid);
     bool joinRoom(int roomId, int uid);
     bool quitRoom(int roomId, int uid);
