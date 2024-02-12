@@ -69,8 +69,11 @@ int main()
                 return;
             }
             else if (jsRequest["type"] == "ROOMCHECK") {
-
+                int uid = jsRequest["uid"].get<int>();
+                int rid = jsRequest["rid"].get<int>();
+                
+                audioServer.
+            
             }
-       
     });
 }
