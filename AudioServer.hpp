@@ -23,6 +23,7 @@ public:
     bool createRoom(int uid);
     bool joinRoom(int roomId, int uid);
     bool quitRoom(int roomId, int uid);
+    std::vector<std::string> roomCheck(int roomId, int uid);
 
     std::string lastError;
 

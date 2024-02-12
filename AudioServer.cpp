@@ -73,3 +73,20 @@ bool AudioServer::quitRoom(int roomId, int uid) {
 		return false;
 	}
 }
+
+
+std::vector<std::string> AudioServer::roomCheck(int roomId, int uid) {
+	std::vector<std::string> roomUsers = {};
+	std::vector<Room>::iterator iter;
+	iter = std::find(existingRooms.begin(), existingRooms.end(), uid);
+	if (iter != existingRooms.end()) {
+		for (User u : iter->users) {
+			roomUsers.push_back(u.nickname);
+		}
+		return roomUsers;
+	}
+	else {
+		lastError = "This room doesn't exist";
+		return {};
+	}
+}
