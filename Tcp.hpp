@@ -27,7 +27,6 @@ public:
         return _socket;
     }
 
-
     void start() {
         boost::asio::async_read(
             _socket,
@@ -36,6 +35,7 @@ public:
             boost::bind(&TcpConnection::handleRead, shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)
         );
     }
+
 
 private:
 
@@ -52,6 +52,10 @@ private:
         else {
 
             request = std::string(readBuffer);
+
+            if (request.find("LOGIN") != std::string::npos) {
+                lastEp = _socket.remote_endpoint();
+            }
 
             requestParser(request, response);
 
@@ -82,6 +86,7 @@ private:
     std::string request = "";
 
     tcp::socket _socket;
+    tcp::endpoint lastEp;
 };
 
 class TcpServer {
@@ -100,13 +105,11 @@ public:
         ioc.run();
     }
 
-
     //priv functions
 private:
 
     void startAccept(std::function<void(std::string, std::string&)> f) {
-        TcpConnection::pointer newConnection = TcpConnection::create(io_context, f);
-
+        newConnection = TcpConnection::create(io_context, f);
         acceptor.async_accept(newConnection->socket(),
             boost::bind(&TcpServer::handleAccept, this, newConnection, boost::asio::placeholders::error));
     }
@@ -121,8 +124,11 @@ private:
 
     //priv variables
 private:
+    TcpConnection::pointer newConnection;
+
     boost::asio::io_context& io_context;
     tcp::acceptor acceptor;
     std::function<void(std::string, std::string&)> requestParser;
 };
+
 
