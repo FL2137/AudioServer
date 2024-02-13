@@ -100,8 +100,6 @@ void AudioServer::notifyRoom(int roomId) {
 
 		ioc.run();
 
-		json roomData = iter->
-
 
 		for (const User& user : iter->users) {
 			socket.connect(user.tcpEndpoint);
