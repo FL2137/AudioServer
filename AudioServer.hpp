@@ -7,6 +7,8 @@
 #include <algorithm>
 #include "nlohmann/json.hpp"
 
+#include "Room.hpp"
+#include "User.hpp
 
 using nlohmann::json;
 

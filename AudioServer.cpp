@@ -100,10 +100,12 @@ void AudioServer::notifyRoom(int roomId) {
 
 		ioc.run();
 
+		json data = iter->toJson();
 
 		for (const User& user : iter->users) {
 			socket.connect(user.tcpEndpoint);
-			socket.write_some(boost::asio)
+			socket.write_some(boost::asio::buffer(data.dump()));
+			socket.close();
 		}
 	}
 }
