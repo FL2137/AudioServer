@@ -74,7 +74,6 @@ bool AudioServer::quitRoom(int roomId, int uid) {
 	}
 }
 
-
 std::vector<std::string> AudioServer::roomCheck(int roomId, int uid) {
 	std::vector<std::string> roomUsers = {};
 	std::vector<Room>::iterator iter;
@@ -88,5 +87,25 @@ std::vector<std::string> AudioServer::roomCheck(int roomId, int uid) {
 	else {
 		lastError = "This room doesn't exist";
 		return {};
+	}
+}
+
+void AudioServer::notifyRoom(int roomId) {
+	std::vector<Room>::iterator iter = std::find(existingRooms.begin(), existingRooms.end(), roomId);
+	if (iter != existingRooms.end()) {
+		
+		boost::asio::io_context ioc;
+
+		tcp::socket socket(ioc);
+
+		ioc.run();
+
+		json roomData = iter->
+
+
+		for (const User& user : iter->users) {
+			socket.connect(user.tcpEndpoint);
+			socket.write_some(boost::asio)
+		}
 	}
 }

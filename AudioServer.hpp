@@ -29,61 +29,15 @@ public:
 
     int lastUid;
 
+    void notifyRoom(int roomId);
+
 private:
 
     std::vector<User> loggedUsers = {};
     std::vector<Room> existingRooms = {};
 };
 
-class User {
-public:
-
-    User(std::string nickname, int uid) {
-        this->nickname = nickname;
-        this->uid = uid;
-    }
-
-    tcp::endpoint tcpEndpoint;
-    udp::endpoint udpEndpoint;
-
-    std::string nickname;
-
-    int uid;
-
-    bool operator==(int _uid) {
-        if (_uid == this->uid)
-            return true;
-        else
-            return false;
-    }
-};
-
-class Room {
-public:
-
-    Room(User& host) {
-        users.push_back(host);
-    }
-
-    int id;
-    int size;
-
-    inline void kick(int uid) {
-        users.erase(std::remove(users.begin(), users.end(), uid), users.end());
-    }
-
-    inline void addUser(const User& user) {
-        users.push_back(user);
-    }
-
-    bool operator==(int rid) {
-        if (rid == this->id)
-            return true;
-        else
-            return false;
-    }
 
 
-    std::vector<User> users;
-};
+
 
