@@ -1,5 +1,8 @@
 #pragma once
 #include "User.hpp"
+#include <nlohmann/json.hpp>
+
+using nlohmann::json;
 
 class Room {
 public:
@@ -25,6 +28,8 @@ public:
         else
             return false;
     }
+
+    json toJson();
 
     std::vector<User> users;
 };
