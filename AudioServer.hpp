@@ -7,8 +7,10 @@
 #include <algorithm>
 #include "nlohmann/json.hpp"
 
+#include "User.hpp"
+
 #include "Room.hpp"
-#include "User.hpp
+
 
 using nlohmann::json;
 
@@ -21,7 +23,7 @@ public:
         lastUid = 0;
     }
 
-    bool userConnected(std::string userData);
+    bool userConnected(std::string userData, tcp::endpoint *lastEndpoint);
     bool createRoom(int uid);
     bool joinRoom(int roomId, int uid);
     bool quitRoom(int roomId, int uid);

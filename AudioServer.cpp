@@ -16,14 +16,16 @@ bool AudioServer::createRoom(int uid) {
 	}
 }
 
-bool AudioServer::userConnected(std::string userData) {
+bool AudioServer::userConnected(std::string userData, tcp::endpoint *lastEndpoint) {
 	json data = json::parse(userData);
 
 	try {
 		std::string nickname = data["nickname"];
 		std::string password = data["password"];
 		std::cout << "nick: " << nickname << " pass: " << password << std::endl;
-		loggedUsers.push_back(User(nickname, lastUid++));
+		User user(nickname, lastUid++);
+		user.tcpEndpoint = tcp::endpoint(lastEndpoint->address(), lastEndpoint->port());
+		loggedUsers.push_back(user);
 	}
 	catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
