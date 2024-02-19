@@ -1,18 +1,17 @@
 #include "AudioServer.hpp"
 
 
-bool AudioServer::createRoom(int uid) {
+int AudioServer::createRoom(int uid) {
 	std::vector<User>::iterator iter;
 
 	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
 		User host = *iter;
 		std::cout << "uid:" << host.uid << std::endl;
-
-		return true;
+		return lastRid++;
 	}
 	else {
 		lastError = "This user is not logged in";
-		return false;
+		return 0;
 	}
 }
 

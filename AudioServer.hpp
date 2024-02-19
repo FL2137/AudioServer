@@ -24,14 +24,16 @@ public:
     }
 
     bool userConnected(std::string userData, tcp::endpoint *lastEndpoint);
-    bool createRoom(int uid);
+    int createRoom(int uid);
     bool joinRoom(int roomId, int uid);
     bool quitRoom(int roomId, int uid);
     std::vector<std::string> roomCheck(int roomId, int uid);
 
     std::string lastError;
 
+    //bad scalability here
     int lastUid;
+    int lastRid;
 
     void notifyRoom(int roomId);
 
