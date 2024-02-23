@@ -20,13 +20,15 @@ class Room;
 class AudioServer {
 public:
     AudioServer() {
-        lastUid = 0;
+        lastUid = 1;
+        lastRid = 1;
     }
 
     bool userConnected(std::string userData, tcp::endpoint *lastEndpoint);
     int createRoom(int uid);
     bool joinRoom(int roomId, int uid);
     bool quitRoom(int roomId, int uid);
+    bool setAvatar(int uid, std::string data);
     std::vector<std::string> roomCheck(int roomId, int uid);
 
     std::string lastError;
@@ -36,6 +38,13 @@ public:
     int lastRid;
 
     void notifyRoom(int roomId);
+
+
+    static std::string base64_encode(const std::string& in);
+
+    static std::string base64_decode(const std::string& in);
+
+
 
 private:
 
