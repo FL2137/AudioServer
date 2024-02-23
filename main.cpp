@@ -21,8 +21,12 @@ int main() {
 
             int uid = jsRequest["uid"].get<int>();
 
-            if (audioServer.createRoom(uid)) {
-                response = "OK";
+            int rid;
+            if ((rid = audioServer.createRoom(uid))) {
+                json js;
+                js["ok"] = "OK";
+                js["rid"] = rid;
+                response = js.dump();
             }
             else {
                 response = audioServer.lastError;
@@ -44,7 +48,7 @@ int main() {
         }
         else if (jsRequest["type"] == "LOGIN") {
             std::cout << jsRequest["data"] << std::endl;
-            if (audioServer.userConnected(jsRequest["data"].get<std::string>())) {
+            if (audioServer.userConnected(jsRequest["data"].get<std::string>(), ep)) {
                 json js;
                 js["ok"] = "OK";
                 js["uid"] = audioServer.lastUid - 1;
@@ -56,6 +60,21 @@ int main() {
                 response = js.dump();
             }
 
+            return;
+        }
+        else if (jsRequest["type"] == "SETAVATAR") {
+            int uid = jsRequest["uid"].get<int>();
+            
+            if (audioServer.setAvatar(uid, jsRequest["data"].get<std::string>())) {
+                json js;
+                js["ok"] = "OK";
+                response = js.dump();
+            }
+            else {
+                json js;
+                js["ok"] = audioServer.lastError;
+                response = js.dump();
+            }
             return;
         }
         else if (jsRequest["type"] == "QUITROOM") {
