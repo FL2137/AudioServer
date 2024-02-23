@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <boost/asio.hpp>
 
 using boost::asio::ip::tcp;
@@ -18,6 +19,11 @@ public:
     udp::endpoint udpEndpoint;
 
     std::string nickname;
+
+    //should this be stored????
+    char* avatarPicture;
+
+
 
     int uid;
 
