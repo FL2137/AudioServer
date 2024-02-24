@@ -11,10 +11,10 @@ int main() {
     boost::asio::io_context ioc;
 
     TcpServer tcpServer(ioc, "192.168.1.109", PORT, [&](std::string request, std::string& response, tcp::endpoint *ep) {
-        std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
+        //std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
         json jsRequest = json::parse(request.c_str());
        
-        std::cout << jsRequest["type"] << std::endl;
+        std::cout << ">" << jsRequest["type"] << std::endl;
         
 
         if (jsRequest["type"] == "CREATEROOM") {
@@ -47,7 +47,8 @@ int main() {
             return;
         }
         else if (jsRequest["type"] == "LOGIN") {
-            std::cout << jsRequest["data"] << std::endl;
+           
+            std::cout << ep->address().to_string() << std::endl;
             if (audioServer.userConnected(jsRequest["data"].get<std::string>(), ep)) {
                 json js;
                 js["ok"] = "OK";
