@@ -38,7 +38,7 @@ public:
     int lastRid;
 
     void notifyRoom(int roomId);
-
+    void notifyFriends(int uid);
 
     static std::string base64_encode(const std::string& in);
 

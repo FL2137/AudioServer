@@ -111,6 +111,23 @@ void AudioServer::notifyRoom(int roomId) {
 	}
 }
 
+void AudioServer::notifyFriends(int uid) {
+
+	boost::asio::io_context ioc;
+	tcp::socket socket(ioc);
+	ioc.run();
+
+
+	json js;
+	js["users"] = json::array_t();
+
+	for (const User& user : loggedUsers) {
+		socket.connect(user.tcpEndpoint);
+		socket.write_some(boost::asio::buffer("{}"));
+		socket.close();
+	}
+}
+
 bool AudioServer::setAvatar(int uid, std::string data) {
 
 	std::vector<User>::iterator iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid);
