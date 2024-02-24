@@ -71,7 +71,7 @@ private:
 
     void handleWrite(const boost::system::error_code& error, size_t bytesTransferred) {
         if (!error) {
-            std::cout << "Sent via socket: " << bytesTransferred << std::endl;
+            //std::cout << "Sent via socket: " << bytesTransferred << std::endl;
         }
         else {
             std::cerr << "Error writing response" << std::endl;
