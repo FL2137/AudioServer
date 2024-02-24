@@ -119,11 +119,18 @@ void AudioServer::notifyFriends(int uid) {
 
 
 	json js;
-	js["users"] = json::array_t();
+	js["users"] = json::array();
+
+	json::array_t users;
+
+	for (const User& user : loggedUsers)
+		users.push_back(user.nickname);
+		
+	js["users"] = users;
 
 	for (const User& user : loggedUsers) {
 		socket.connect(user.tcpEndpoint);
-		socket.write_some(boost::asio::buffer("{}"));
+		socket.write_some(boost::asio::buffer(js.dump()));
 		socket.close();
 	}
 }
