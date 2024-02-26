@@ -37,18 +37,20 @@ public:
     int lastUid;
     int lastRid;
 
+
+    //these functions will be run in a detached thread, so they have to be passed everything they need
     void notifyRoom(int roomId);
-    void notifyFriends(int uid);
+    void notifyFriends(int uid, const std::vector<User>& _loggedUsers);
 
     static std::string base64_encode(const std::string& in);
 
     static std::string base64_decode(const std::string& in);
 
+    std::vector<User> loggedUsers = {};
 
 
 private:
 
-    std::vector<User> loggedUsers = {};
     std::vector<Room> existingRooms = {};
 };
 

@@ -111,7 +111,7 @@ void AudioServer::notifyRoom(int roomId) {
 	}
 }
 
-void AudioServer::notifyFriends(int uid) {
+void AudioServer::notifyFriends(int uid, const std::vector<User> &_loggedUsers) {
 
 	boost::asio::io_context ioc;
 	tcp::socket socket(ioc);
@@ -123,15 +123,25 @@ void AudioServer::notifyFriends(int uid) {
 
 	json::array_t users;
 
-	for (const User& user : loggedUsers)
+	for (const User& user : _loggedUsers)
 		users.push_back(user.nickname);
-		
+	
 	js["users"] = users;
+	js["type"] == "NOTIFYFRIENDS";
 
-	for (const User& user : loggedUsers) {
-		socket.connect(user.tcpEndpoint);
-		socket.write_some(boost::asio::buffer(js.dump()));
-		socket.close();
+	for (const User& user : _loggedUsers) {
+		if (user.uid != uid) {
+			try {
+				std::cout << "Notifying " << user.tcpEndpoint.address().to_string() << ":" << user.tcpEndpoint.port() << std::endl;
+				tcp::endpoint ep(user.udpEndpoint.address(), 3009);
+ 				socket.connect(ep);
+				socket.write_some(boost::asio::buffer(js.dump()));
+				socket.close();
+			}
+			catch (const std::exception& e) {
+				std::cout << "THREW: " << e.what() << std::endl;
+			}
+		}
 	}
 }
 
