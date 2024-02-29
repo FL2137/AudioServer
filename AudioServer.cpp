@@ -91,6 +91,15 @@ std::vector<std::string> AudioServer::roomCheck(int roomId, int uid) {
 	}
 }
 
+std::vector<std::string> AudioServer::friendListCheck(int uid) {
+	std::vector<std::string> nicknames = {};
+	for (const User& user : loggedUsers) {
+		if (user.uid != uid)
+			nicknames.push_back(user.nickname);
+	}
+	return nicknames;
+}
+
 void AudioServer::notifyRoom(int roomId) {
 	std::vector<Room>::iterator iter = std::find(existingRooms.begin(), existingRooms.end(), roomId);
 	if (iter != existingRooms.end()) {

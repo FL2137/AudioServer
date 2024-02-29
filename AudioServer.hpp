@@ -29,6 +29,8 @@ public:
     bool joinRoom(int roomId, int uid);
     bool quitRoom(int roomId, int uid);
     bool setAvatar(int uid, std::string data);
+
+    std::vector<std::string> friendListCheck(int uid);
     std::vector<std::string> roomCheck(int roomId, int uid);
 
     std::string lastError;
