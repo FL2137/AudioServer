@@ -11,22 +11,12 @@ int main() {
     boost::asio::io_context ioc;
 
     std::vector<User> users;
-    tcp::endpoint ep(boost::asio::ip::make_address_v4("127.0.0.1"), 3009);
+    tcp::endpoint ep(boost::asio::ip::make_address_v4("192.168.1.109"), 3009);
     tcp::socket socket(ioc);
-    
-    try {
-        socket.connect(ep);
-        socket.send(boost::asio::buffer("lalalala"));
-        socket.close();
-    }
-    catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
-    }
-    
     
 
     std::thread notifyThread;
-    /*
+
     TcpServer tcpServer(ioc, "192.168.1.109", PORT, [&](std::string request, std::string& response, tcp::endpoint *ep) {
         //std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
         json jsRequest = json::parse(request.c_str());
@@ -117,9 +107,19 @@ int main() {
             int uid = jsRequest["uid"].get<int>();
             int rid = jsRequest["rid"].get<int>();
         }
+        else if (jsRequest["type"] == "FRIENDSCHECK") {
+            int uid = jsRequest["uid"].get<int>();
+            
+            std::vector<std::string> friends = audioServer.friendListCheck(uid);
+            json js;
+            js["data"] = json::array();
+            for (const std::string& _friend : friends) {
+                js["data"].push_back(_friend);
+            }
+            response = js.dump();
+        }
+
     });
-    */
     
-    getchar();
-    //ioc.run();
+    ioc.run();
 }
