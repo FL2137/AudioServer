@@ -3,6 +3,8 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <memory>
+
 #include <libpq-fe.h>
 using namespace dmitigr;
 
@@ -11,40 +13,57 @@ class Database {
 public:
 
 	Database() {
-		pgfe::Connection_options options;
-		pgfe::Connection con;
-
+		setupConnection();
 	}
 
 
-	//void connection() {
-	//	//setting connection options
-	//	pgfe::Connection_options options;
+	void setupConnection() {
+		//setting connection options
+		pgfe::Connection_options options;
 
-	//	std::ifstream file("dbCreds.txt");
+		std::ifstream file("dbCreds.txt");
 
-	//	std::string creds;
-	//	options.set(pgfe::Communication_mode::net);
+		std::string creds;
+		options.set(pgfe::Communication_mode::net);
 
-	//	std::getline(file, creds);
-	//	options.set_hostname(creds);
+		std::getline(file, creds);
+		std::cout << creds << std::endl;
+		options.set_hostname(creds);
 
-	//	std::getline(file, creds);
-	//	options.set_database(creds);
+		std::getline(file, creds);
+		std::cout << creds << std::endl;
+		options.set_database(creds);
 
-	//	std::getline(file, creds);
-	//	options.set_username(creds);
+		std::getline(file, creds);
+		std::cout << creds << std::endl;
+		options.set_username(creds);
 
-	//	std::getline(file, creds);
-	//	options.set_password(creds);
+		std::getline(file, creds);
+		std::cout << creds << std::endl;
+		options.set_password(creds);
+
+		//making the connection
+
+		connection = new pgfe::Connection(options);
 
 
 
-	//	//making the connection
-	//	pgfe::Connection connection(options);
+		try {
+			connection->connect();
+		}
+		catch (const std::exception& e) {
+			std::cout << "Database::exception: " << e.what() << std::endl;
+		}
+		if (connection->is_connected()) {
+			std::cout << "lalalalalala";
+		}
+		else {
+			std::cout << "nie dziala :(";
+		}
+	}
 
-	//	connection.connect();
-	//}
+private:
 
+	pgfe::Connection* connection;
 
 };
