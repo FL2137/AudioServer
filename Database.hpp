@@ -6,6 +6,7 @@
 #include <memory>
 
 #include <libpq-fe.h>
+
 using namespace dmitigr;
 
 class Database {
@@ -15,7 +16,6 @@ public:
 	Database() {
 		setupConnection();
 	}
-
 
 	void setupConnection() {
 		//setting connection options
@@ -46,8 +46,6 @@ public:
 
 		connection = new pgfe::Connection(options);
 
-
-
 		try {
 			connection->connect();
 		}
@@ -55,10 +53,10 @@ public:
 			std::cout << "Database::exception: " << e.what() << std::endl;
 		}
 		if (connection->is_connected()) {
-			std::cout << "lalalalalala";
+			std::cout << "Connected!";
 		}
 		else {
-			std::cout << "nie dziala :(";
+			std::cout << "Could'nt connect :(";
 		}
 	}
 
