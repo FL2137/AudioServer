@@ -1,10 +1,17 @@
-#include "AudioServer.hpp"
+
 #include "Request.hpp"
 #include "nlohmann/json.hpp"
+#include "AudioServer.hpp"
 
-using nlohmann::json;
+#include "Database.hpp"
+
 
 int main() {
+
+    {
+        Database db;
+    }
+
 
     AudioServer audioServer;
 
