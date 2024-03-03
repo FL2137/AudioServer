@@ -19,8 +19,8 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection> {
 public:
     typedef boost::shared_ptr<TcpConnection> pointer;
 
-    static pointer create(boost::asio::io_context& ioc, std::function<void(std::string, std::string&, tcp::endpoint *ep)> requestParser) {
-        return pointer(new TcpConnection(ioc, requestParser));
+    static pointer create(boost::asio::io_context& ioc, void (TcpServer::*foo)(std::string, std::string&, tcp::endpoint *ep)) {
+        return pointer(new TcpConnection(ioc, foo));
     }
 
     tcp::socket& socket() {
@@ -39,22 +39,19 @@ public:
 
 private:
 
-    TcpConnection(boost::asio::io_context& ioc, std::function<void(std::string, std::string&, tcp::endpoint *ep)> requestParser) : _socket(ioc) {
+    TcpConnection(boost::asio::io_context& ioc, void (TcpServer::* requestParser)(std::string, std::string&, tcp::endpoint *ep)) : _socket(ioc) {
         this->requestParser = requestParser;
     }
 
-    ~TcpConnection() {
+    void (*requestParser)(std::string, std::string&, tcp::endpoint*);
 
-    }
-
-    std::function<void(std::string, std::string&, tcp::endpoint *ep)> requestParser;
+    //std::function<void(std::string, std::string&, tcp::endpoint *ep)> requestParser;
 
     void handleRead(const boost::system::error_code& error, size_t bytesTransferred) {
         if (error) {
             std::cerr << "Error receiving message from client: " << error.message() << std::endl;
         }
         else {
-
 
             request = std::string(readBuffer);
 
@@ -97,16 +94,15 @@ private:
 class TcpServer {
 public:
 
-    TcpServer(boost::asio::io_context& _io_context, std::string address, int port, std::function<void(std::string, std::string&, tcp::endpoint *ep)> requestParser)
+    TcpServer(boost::asio::io_context& _io_context, std::string address, int port)
         : io_context(_io_context), acceptor(io_context, tcp::endpoint(boost::asio::ip::make_address_v4(address), port))
     {
-        this->requestParser = requestParser;
-        startAccept(requestParser);
+        startAccept();
     }
 
-    static void asyncServer(std::string address, int port, std::function<void(std::string, std::string&, tcp::endpoint *ep)> requestParser) {
+    static void asyncServer(std::string address, int port, void (*f)(std::string, std::string&, tcp::endpoint*)) {
         boost::asio::io_context ioc;
-        TcpServer server(ioc, address, port, requestParser);
+        TcpServer server(ioc, address, port);
         ioc.run();
     }
 
@@ -120,8 +116,8 @@ public:
     //priv functions
 private:
 
-    void startAccept(std::function<void(std::string, std::string&, tcp::endpoint *ep)> f) {
-        connections.push_back(TcpConnection::create(io_context, f));
+    void startAccept() {
+        connections.push_back(TcpConnection::create(io_context, foo));
 
         acceptor.async_accept(connections[connections.size() - 1]->socket(),
             boost::bind(&TcpServer::handleAccept, this, connections[connections.size() - 1], boost::asio::placeholders::error));
@@ -132,7 +128,7 @@ private:
             newConnection->start();
         }
 
-        startAccept(requestParser);
+        startAccept();
     }
 
 
@@ -145,7 +141,13 @@ private:
 
     boost::asio::io_context& io_context;
     tcp::acceptor acceptor;
-    std::function<void(std::string, std::string&, tcp::endpoint *ep)> requestParser;
+    std::function<void(std::string, std::string&, tcp::endpoint* ep)> requestParser;
+
+    void foo(std::string request, std::string& response, tcp::endpoint *ep) {
+
+    }
+
+
 };
 
 
