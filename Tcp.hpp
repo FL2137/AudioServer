@@ -121,9 +121,10 @@ public:
 private:
 
     void startAccept(std::function<void(std::string, std::string&, tcp::endpoint *ep)> f) {
-        newConnection = TcpConnection::create(io_context, f);
-        acceptor.async_accept(newConnection->socket(),
-            boost::bind(&TcpServer::handleAccept, this, newConnection, boost::asio::placeholders::error));
+        connections.push_back(TcpConnection::create(io_context, f));
+
+        acceptor.async_accept(connections[connections.size() - 1]->socket(),
+            boost::bind(&TcpServer::handleAccept, this, connections[connections.size() - 1], boost::asio::placeholders::error));
     }
 
     void handleAccept(TcpConnection::pointer newConnection, const boost::system::error_code& error) {
@@ -133,7 +134,6 @@ private:
 
         startAccept(requestParser);
     }
-
 
 
     //priv variables
