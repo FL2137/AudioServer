@@ -43,6 +43,10 @@ private:
         this->requestParser = requestParser;
     }
 
+    ~TcpConnection() {
+
+    }
+
     std::function<void(std::string, std::string&, tcp::endpoint *ep)> requestParser;
 
     void handleRead(const boost::system::error_code& error, size_t bytesTransferred) {
@@ -50,6 +54,7 @@ private:
             std::cerr << "Error receiving message from client: " << error.message() << std::endl;
         }
         else {
+
 
             request = std::string(readBuffer);
 
@@ -105,6 +110,13 @@ public:
         ioc.run();
     }
 
+    void notify(std::string notification, int uid) {
+        for (TcpConnection::pointer con : connections) {
+            con->socket().write_some(boost::asio::buffer(notification));
+        }
+    }
+
+
     //priv functions
 private:
 
@@ -122,8 +134,13 @@ private:
         startAccept(requestParser);
     }
 
+
+
     //priv variables
 private:
+
+    std::vector<TcpConnection::pointer> connections;
+
     TcpConnection::pointer newConnection;
 
     boost::asio::io_context& io_context;
