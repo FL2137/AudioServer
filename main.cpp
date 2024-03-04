@@ -14,14 +14,12 @@ int main() {
 
     std::thread notifyThread;
 
-    TcpServer tcpServer(ioc, "192.168.1.109", PORT);
-        
-    auto f = [&](std::string request, std::string& response, tcp::endpoint *ep) {
+    TcpServer tcpServer(ioc, "192.168.1.109", PORT, [&](std::string request, std::string& response, tcp::endpoint* ep) {
         //std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
         json jsRequest = json::parse(request.c_str());
-       
+
         std::cout << ">" << jsRequest["type"] << std::endl;
-        
+
 
         if (jsRequest["type"] == "CREATEROOM") {
 
@@ -49,7 +47,6 @@ int main() {
                 js["ok"] = "OK";
                 response = js.dump();
 
-                tcpServer.notify("ROOMCHECK", uid);
             }
             else {
                 json js;
@@ -59,7 +56,7 @@ int main() {
             return;
         }
         else if (jsRequest["type"] == "LOGIN") {
-           
+
             std::cout << ep->address().to_string() << std::endl;
             if (audioServer.userConnected(jsRequest["data"].get<std::string>(), ep)) {
                 json js;
@@ -79,7 +76,7 @@ int main() {
         }
         else if (jsRequest["type"] == "SETAVATAR") {
             int uid = jsRequest["uid"].get<int>();
-            
+
             if (audioServer.setAvatar(uid, jsRequest["data"].get<std::string>())) {
                 json js;
                 js["ok"] = "OK";
@@ -110,7 +107,7 @@ int main() {
         }
         else if (jsRequest["type"] == "FRIENDSCHECK") {
             int uid = jsRequest["uid"].get<int>();
-            
+
             std::vector<std::string> friends = audioServer.friendListCheck(uid);
             json js;
             js["data"] = json::array();
@@ -119,10 +116,7 @@ int main() {
             }
             response = js.dump();
         }
-
-    };
+    });
     
-    tcpServer.setParsingFunction(f);
-
     ioc.run();
 }
