@@ -8,23 +8,15 @@
 
 int main() {
 
-    {
-        Database db;
-    }
-
-
     AudioServer audioServer;
 
-    boost::asio::io_context ioc;
-
-    std::vector<User> users;
-    tcp::endpoint ep(boost::asio::ip::make_address_v4("192.168.1.109"), 3009);
-    tcp::socket socket(ioc);
-    
+    boost::asio::io_context ioc;    
 
     std::thread notifyThread;
 
-    TcpServer tcpServer(ioc, "192.168.1.109", PORT, [&](std::string request, std::string& response, tcp::endpoint *ep) {
+    TcpServer tcpServer(ioc, "192.168.1.109", PORT);
+        
+    auto f = [&](std::string request, std::string& response, tcp::endpoint *ep) {
         //std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
         json jsRequest = json::parse(request.c_str());
        
@@ -56,6 +48,8 @@ int main() {
                 json js;
                 js["ok"] = "OK";
                 response = js.dump();
+
+                tcpServer.notify("ROOMCHECK", uid);
             }
             else {
                 json js;
@@ -72,8 +66,8 @@ int main() {
                 js["ok"] = "OK";
                 js["uid"] = audioServer.lastUid - 1;
                 response = js.dump();
-                std::thread s(&AudioServer::notifyFriends, &audioServer, audioServer.lastUid - 1, audioServer.loggedUsers);
-                s.detach();
+                /*std::thread s(&AudioServer::notifyFriends, &audioServer, audioServer.lastUid - 1, audioServer.loggedUsers);
+                s.detach();*/
             }
             else {
                 json js;
@@ -126,7 +120,9 @@ int main() {
             response = js.dump();
         }
 
-    });
+    };
     
+    tcpServer.setParsingFunction(f);
+
     ioc.run();
 }
