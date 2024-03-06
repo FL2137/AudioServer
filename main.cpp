@@ -3,10 +3,35 @@
 #include "nlohmann/json.hpp"
 #include "AudioServer.hpp"
 
-#include "Database.hpp"
+#include "WebSocketServer.hpp"
 
 
+//PUSH NOTIFICATIONS HNNNNNNGGGGGGGHHHHHHHHHWAPOGMWAQPOIGFMNOP)IQ@MNE)POI@M!#)!#@!JM$_O!@K$_@!K_#$K!@<+_)$K!@
+
+//simple websocket testing
 int main() {
+    /*WebSocketServer server;
+    server.run();*/
+
+    const auto address = boost::asio::ip::make_address("192.168.1.109");
+    int port = 3005;
+    int threads = 4;
+
+    boost::asio::io_context ioc{ threads };
+
+    std::make_shared<BeastWebSocket>(ioc, tcp::endpoint(address, port))->run();
+
+    std::vector<std::thread> threadV;
+    threadV.reserve(threads - 1);
+    for (auto i = threads - 1; i > 0; --i) {
+        threadV.emplace_back([&ioc] {ioc.run(); });
+    }
+    ioc.run();
+
+    return 0;
+}
+
+/*nt main() {
 
     AudioServer audioServer;
 
@@ -64,7 +89,7 @@ int main() {
                 js["uid"] = audioServer.lastUid - 1;
                 response = js.dump();
                 /*std::thread s(&AudioServer::notifyFriends, &audioServer, audioServer.lastUid - 1, audioServer.loggedUsers);
-                s.detach();*/
+                s.detach();
             }
             else {
                 json js;
@@ -120,3 +145,4 @@ int main() {
     
     ioc.run();
 }
+*/
