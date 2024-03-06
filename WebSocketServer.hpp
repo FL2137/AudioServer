@@ -3,9 +3,27 @@
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 
+#include <algorithm>
+#include <cstdlib>
 #include <functional>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
+#include <boost/asio/dispatch.hpp>
+#include <boost/asio/strand.hpp>
 
 typedef websocketpp::server<websocketpp::config::asio> server;
+
+namespace beast = boost::beast;
+namespace http = beast::http;
+namespace websocket = beast::websocket;
+namespace net = boost::asio;
+using tcp = boost::asio::ip::tcp;
 
 
 class WebSocketServer {
@@ -48,4 +66,109 @@ public:
 
 private:
 	server endpoint;
+};
+
+void beastFail(beast::error_code error, const char* what) {
+	std::cerr << what << ": " << error.message() << std::endl;
+}
+
+class BeastSession : public std::enable_shared_from_this<BeastSession> {
+	websocket::stream<beast::tcp_stream> _ws;
+	beast::flat_buffer _buffer;
+
+public:
+	explicit BeastSession(tcp::socket&& socket) : _ws(std::move(socket)) {
+	}
+
+	void run() {
+		boost::asio::dispatch(	
+			_ws.get_executor(),
+			beast::bind_front_handler(
+				&BeastSession::onRun,
+				shared_from_this()
+		));
+	}
+
+	void onRun() {
+		_ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::server));
+
+		_ws.set_option(websocket::stream_base::decorator([](websocket::response_type& res) {
+			res.set(http::field::server,
+			std::string(BOOST_BEAST_VERSION_STRING) + " websocket-async-server");
+		}));
+
+		_ws.async_accept(
+			beast::bind_front_handler(&BeastSession::onAccept, shared_from_this())
+		);
+	}
+
+	void onAccept(beast::error_code error) {
+		if (error) {
+			return beastFail(error, "accept");
+		}
+
+		doRead();
+	}
+
+	void doRead() {
+		_ws.async_read(_buffer, beast::bind_front_handler(&BeastSession::readHandler, shared_from_this()));
+	}
+
+	void readHandler(beast::error_code error, size_t bytesTransferred) {
+		boost::ignore_unused(bytesTransferred);
+		if (error == websocket::error::closed)
+			return;
+
+		if (error)
+			return beastFail(error, "Read");
+
+		//*message parsing*
+
+		_ws.text(_ws.got_text());
+
+		_ws.async_write(_buffer.data(), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
+	}
+
+	void writeHandler(beast::error_code error, size_t bytesTransferred) {
+		boost::ignore_unused(bytesTransferred);
+
+		if (error)
+			return beastFail(error, "Write");
+
+		_buffer.consume(_buffer.size());
+
+		doRead();
+	}
+
+};
+
+class BeastWebSocket : public std::enable_shared_from_this<BeastWebSocket> {
+
+	boost::asio::io_context& ioc;
+	tcp::acceptor acceptor;
+
+public:
+	BeastWebSocket(boost::asio::io_context& _ioc, tcp::endpoint endpoint) : ioc(_ioc), acceptor(ioc) {
+		beast::error_code error;
+	
+		acceptor.open(endpoint.protocol(), error);
+		acceptor.set_option(boost::asio::socket_base::reuse_address(true), error);
+		acceptor.bind(endpoint, error);
+		acceptor.listen(boost::asio::socket_base::max_listen_connections, error);
+	}
+
+	void run() {
+		doAccept();
+	}
+
+
+	void doAccept() {
+		acceptor.async_accept(boost::asio::make_strand(ioc), beast::bind_front_handler(&BeastWebSocket::onAccept, shared_from_this()));
+	}
+	void onAccept(beast::error_code error, tcp::socket socket) {
+
+		std::make_shared<BeastSession>(std::move(socket))->run();
+
+		doAccept();
+	}
 };
