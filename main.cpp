@@ -19,8 +19,111 @@ int main() {
 
     boost::asio::io_context ioc{ threads };
 
-    std::make_shared<BeastWebSocket>(ioc, tcp::endpoint(address, port))->run();
+    AudioServer audioServer;
 
+    std::make_shared<BeastWebSocket>(ioc, tcp::endpoint(address, port), [&](std::string request, std::string& response) {
+        //std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
+        json jsRequest = json::parse(request.c_str());
+
+        std::cout << ">" << jsRequest["type"] << std::endl;
+
+
+        if (jsRequest["type"] == "CREATEROOM") {
+
+            int uid = jsRequest["uid"].get<int>();
+
+            int rid;
+            if ((rid = audioServer.createRoom(uid))) {
+                json js;
+                js["ok"] = "OK";
+                js["rid"] = rid;
+                response = js.dump();
+            }
+            else {
+                response = audioServer.lastError;
+            }
+            return;
+        }
+        else if (jsRequest["type"] == "JOINROOM") {
+
+            int uid = jsRequest["uid"].get<int>();
+            int roomId = jsRequest["rid"].get<int>();
+
+            if (audioServer.joinRoom(roomId, uid)) {
+                json js;
+                js["ok"] = "OK";
+                response = js.dump();
+
+            }
+            else {
+                json js;
+                js["ok"] = audioServer.lastError;
+                response = js.dump();
+            }
+            return;
+        }
+        else if (jsRequest["type"] == "LOGIN") {
+
+            if (audioServer.userConnected(jsRequest["data"].get<std::string>())) {
+                json js;
+                js["ok"] = "OK";
+                js["uid"] = audioServer.lastUid - 1;
+                response = js.dump();
+                /*std::thread s(&AudioServer::notifyFriends, &audioServer, audioServer.lastUid - 1, audioServer.loggedUsers);
+                s.detach();*/
+            }
+            else {
+                json js;
+                js["ok"] = audioServer.lastError;
+                response = js.dump();
+            }
+
+            return;
+        }
+        else if (jsRequest["type"] == "SETAVATAR") {
+            int uid = jsRequest["uid"].get<int>();
+
+            if (audioServer.setAvatar(uid, jsRequest["data"].get<std::string>())) {
+                json js;
+                js["ok"] = "OK";
+                response = js.dump();
+            }
+            else {
+                json js;
+                js["ok"] = audioServer.lastError;
+                response = js.dump();
+            }
+            return;
+        }
+        else if (jsRequest["type"] == "QUITROOM") {
+            int uid = jsRequest["uid"].get<int>();
+            int roomId = jsRequest["rid"].get<int>();
+
+            if (audioServer.quitRoom(roomId, uid)) {
+                response = "OK";
+            }
+            else {
+                response = audioServer.lastError;
+            }
+            return;
+        }
+        else if (jsRequest["type"] == "ROOMCHECK") {
+            int uid = jsRequest["uid"].get<int>();
+            int rid = jsRequest["rid"].get<int>();
+        }
+        else if (jsRequest["type"] == "FRIENDSCHECK") {
+            int uid = jsRequest["uid"].get<int>();
+
+            std::vector<std::string> friends = audioServer.friendListCheck(uid);
+            json js;
+            js["data"] = json::array();
+            for (const std::string& _friend : friends) {
+                js["data"].push_back(_friend);
+            }
+            response = js.dump();
+        }
+    })->run();
+    
     std::vector<std::thread> threadV;
     threadV.reserve(threads - 1);
     for (auto i = threads - 1; i > 0; --i) {
