@@ -24,7 +24,7 @@ public:
         lastRid = 1;
     }
 
-    bool userConnected(std::string userData, tcp::endpoint *lastEndpoint);
+    bool userConnected(std::string userData);
     int createRoom(int uid);
     bool joinRoom(int roomId, int uid);
     bool quitRoom(int roomId, int uid);
