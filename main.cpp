@@ -15,13 +15,13 @@ int main() {
 
     const auto address = boost::asio::ip::make_address("192.168.1.109");
     int port = 3005;
-    int threads = 4;
+    int threads = 1;
 
     boost::asio::io_context ioc{ threads };
 
     AudioServer audioServer;
 
-    std::make_shared<BeastWebSocket>(ioc, tcp::endpoint(address, port), [&](std::string request, std::string& response) {
+    std::shared_ptr<BeastWebSocket> beast = std::make_shared<BeastWebSocket>(ioc, tcp::endpoint(address, port), [&](std::string request, std::string& response) {
         //std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
         json jsRequest = json::parse(request.c_str());
 
@@ -122,13 +122,15 @@ int main() {
             }
             response = js.dump();
         }
-    })->run();
-    
+    });
+    beast->run();
+
     std::vector<std::thread> threadV;
     threadV.reserve(threads - 1);
     for (auto i = threads - 1; i > 0; --i) {
         threadV.emplace_back([&ioc] {ioc.run(); });
     }
+
     ioc.run();
 
     return 0;
