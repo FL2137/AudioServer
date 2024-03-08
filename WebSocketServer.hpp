@@ -77,7 +77,8 @@ class BeastSession : public std::enable_shared_from_this<BeastSession> {
 	beast::flat_buffer _buffer;
 
 public:
-	explicit BeastSession(tcp::socket&& socket) : _ws(std::move(socket)) {
+	BeastSession(tcp::socket&& socket, std::function<void(std::string, std::string&)> parser) : _ws(std::move(socket)) {
+		this->parser = parser;
 	}
 
 	void run() {
@@ -123,10 +124,12 @@ public:
 			return beastFail(error, "Read");
 
 		//*message parsing*
+		std::string request((char*)_buffer.data().data());
+		std::cout << request << std::endl; 
+		std::string response;
+		parser(request, response);
 
-		_ws.text(_ws.got_text());
-
-		_ws.async_write(_buffer.data(), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
+		_ws.async_write(boost::asio::buffer(response), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
 	}
 
 	void writeHandler(beast::error_code error, size_t bytesTransferred) {
@@ -140,6 +143,9 @@ public:
 		doRead();
 	}
 
+private:
+	std::function<void(std::string, std::string&)> parser;
+
 };
 
 class BeastWebSocket : public std::enable_shared_from_this<BeastWebSocket> {
@@ -148,7 +154,7 @@ class BeastWebSocket : public std::enable_shared_from_this<BeastWebSocket> {
 	tcp::acceptor acceptor;
 
 public:
-	BeastWebSocket(boost::asio::io_context& _ioc, tcp::endpoint endpoint) : ioc(_ioc), acceptor(ioc) {
+	BeastWebSocket(boost::asio::io_context& _ioc, tcp::endpoint endpoint, std::function<void(std::string, std::string&)> _parser) : ioc(_ioc), acceptor(ioc) {
 		beast::error_code error;
 	
 		acceptor.open(endpoint.protocol(), error);
@@ -167,8 +173,13 @@ public:
 	}
 	void onAccept(beast::error_code error, tcp::socket socket) {
 
-		std::make_shared<BeastSession>(std::move(socket))->run();
+		std::make_shared<BeastSession>(std::move(socket), parser)->run();
 
 		doAccept();
 	}
+
+private:
+
+	std::function<void(std::string, std::string&)> parser;
+
 };
