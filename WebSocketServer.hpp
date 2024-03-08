@@ -112,7 +112,7 @@ public:
 	}
 
 	void doRead() {
-		_ws.async_read(_buffer, beast::bind_front_handler(&BeastSession::readHandler, shared_from_this()));
+		_ws.async_read(, beast::bind_front_handler(&BeastSession::readHandler, shared_from_this()));
 	}
 
 	void readHandler(beast::error_code error, size_t bytesTransferred) {
@@ -126,8 +126,8 @@ public:
 		//*message parsing*
 		std::string request((char*)_buffer.data().data());
 		std::cout << request << std::endl; 
-		std::string response;
-		parser(request, response);
+		std::string response = "response from server";
+		//parser(request, response);
 
 		_ws.async_write(boost::asio::buffer(response), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
 	}
@@ -166,7 +166,6 @@ public:
 	void run() {
 		doAccept();
 	}
-
 
 	void doAccept() {
 		acceptor.async_accept(boost::asio::make_strand(ioc), beast::bind_front_handler(&BeastWebSocket::onAccept, shared_from_this()));
