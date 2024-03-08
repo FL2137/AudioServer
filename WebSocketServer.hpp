@@ -112,7 +112,7 @@ public:
 	}
 
 	void doRead() {
-		_ws.async_read(, beast::bind_front_handler(&BeastSession::readHandler, shared_from_this()));
+		_ws.async_read(_buffer, beast::bind_front_handler(&BeastSession::readHandler, shared_from_this()));
 	}
 
 	void readHandler(beast::error_code error, size_t bytesTransferred) {
@@ -124,12 +124,19 @@ public:
 			return beastFail(error, "Read");
 
 		//*message parsing*
-		std::string request((char*)_buffer.data().data());
-		std::cout << request << std::endl; 
-		std::string response = "response from server";
+		//std::string request((char*)_buffer.data().data());
+		//std::cout << request << std::endl; 
+		//std::string response = "response from server";
 		//parser(request, response);
+		_ws.text(_ws.got_text());
 
-		_ws.async_write(boost::asio::buffer(response), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
+		std::string str = beast::buffers_to_string(_buffer.data());
+		
+		beast::flat_buffer b;
+		beast::ostream(b) << str;
+		
+
+		_ws.async_write(b.data(), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
 	}
 
 	void writeHandler(beast::error_code error, size_t bytesTransferred) {
