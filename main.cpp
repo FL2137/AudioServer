@@ -22,10 +22,10 @@ int main() {
     AudioServer audioServer;
 
     std::shared_ptr<BeastWebSocket> beast = std::make_shared<BeastWebSocket>(ioc, tcp::endpoint(address, port), [&](std::string request, std::string& response) {
-        //std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
+        std::cout << "Request: " << request << " of size: " << request.size() << std::endl;
         json jsRequest = json::parse(request.c_str());
 
-        std::cout << ">" << jsRequest["type"] << std::endl;
+        std::cout << ">" << jsRequest["data"].is_object() << std::endl;
 
 
         if (jsRequest["type"] == "CREATEROOM") {
@@ -64,7 +64,7 @@ int main() {
         }
         else if (jsRequest["type"] == "LOGIN") {
 
-            if (audioServer.userConnected(jsRequest["data"].get<std::string>())) {
+            if (audioServer.userConnected(jsRequest["data"].dump())) {
                 json js;
                 js["ok"] = "OK";
                 js["uid"] = audioServer.lastUid - 1;
@@ -83,7 +83,7 @@ int main() {
         else if (jsRequest["type"] == "SETAVATAR") {
             int uid = jsRequest["uid"].get<int>();
 
-            if (audioServer.setAvatar(uid, jsRequest["data"].get<std::string>())) {
+            if (audioServer.setAvatar(uid, jsRequest["data"].dump())) {
                 json js;
                 js["ok"] = "OK";
                 response = js.dump();
