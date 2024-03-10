@@ -132,6 +132,8 @@ public:
 
 		std::string str = beast::buffers_to_string(_buffer.data());
 		
+		parser(str, str);
+
 		beast::flat_buffer b;
 		beast::ostream(b) << str;
 		
@@ -163,7 +165,7 @@ class BeastWebSocket : public std::enable_shared_from_this<BeastWebSocket> {
 public:
 	BeastWebSocket(boost::asio::io_context& _ioc, tcp::endpoint endpoint, std::function<void(std::string, std::string&)> _parser) : ioc(_ioc), acceptor(ioc) {
 		beast::error_code error;
-	
+		parser = _parser;
 		acceptor.open(endpoint.protocol(), error);
 		acceptor.set_option(boost::asio::socket_base::reuse_address(true), error);
 		acceptor.bind(endpoint, error);
