@@ -33,8 +33,6 @@ public:
 		endpoint.set_access_channels(websocketpp::log::alevel::all ^ websocketpp::log::alevel::frame_payload);
 		endpoint.init_asio();
 
-
-
 		endpoint.set_message_handler(
 			std::bind(
 				&WebSocketServer::readHandler,
@@ -107,7 +105,7 @@ public:
 		if (error) {
 			return beastFail(error, "accept");
 		}
-
+		std::cout << "Accepted connection\n";
 		doRead();
 	}
 
@@ -116,6 +114,8 @@ public:
 	}
 
 	void readHandler(beast::error_code error, size_t bytesTransferred) {
+		std::cout << "::readHandler() \n";
+
 		boost::ignore_unused(bytesTransferred);
 		if (error == websocket::error::closed)
 			return;
@@ -131,6 +131,7 @@ public:
 		_ws.text(_ws.got_text());
 
 		std::string str = beast::buffers_to_string(_buffer.data());
+		std::cout << "Read: " << str << std::endl;
 		
 		parser(str, str);
 
