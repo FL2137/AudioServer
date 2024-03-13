@@ -25,47 +25,6 @@ namespace websocket = beast::websocket;
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 
-
-class WebSocketServer {
-public:
-	WebSocketServer() {
-		endpoint.set_error_channels(websocketpp::log::elevel::all);
-		endpoint.set_access_channels(websocketpp::log::alevel::all ^ websocketpp::log::alevel::frame_payload);
-		endpoint.init_asio();
-
-		endpoint.set_message_handler(
-			std::bind(
-				&WebSocketServer::readHandler,
-				this,
-				std::placeholders::_1,
-				std::placeholders::_2
-			)
-		);
-
-	}
-
-	void readHandler(websocketpp::connection_hdl hdl, server::message_ptr message) {
-		std::cout << message->get_payload();
-	}
-
-	void run() {
-
-		boost::system::error_code error;
-		endpoint.listen("192.168.1.109", "3005", error);
-		endpoint.start_accept();
-		if (endpoint.is_listening() && endpoint.is_server()) {
-
-			boost::system::error_code er;
-			auto ep = endpoint.get_local_endpoint(er);
-			std::cout << "Server listening on " << ep.address().to_string() + ":" << ep.port() << std::endl;
-		}
-		endpoint.run();
-	}
-
-private:
-	server endpoint;
-};
-
 void beastFail(beast::error_code error, const char* what) {
 	std::cerr << what << ": " << error.message() << std::endl;
 }
@@ -131,7 +90,6 @@ public:
 		_ws.text(_ws.got_text());
 
 		std::string str = beast::buffers_to_string(_buffer.data());
-		std::cout << "Read: " << str << std::endl;
 		
 		parser(str, str);
 
