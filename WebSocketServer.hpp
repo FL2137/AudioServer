@@ -22,7 +22,7 @@ typedef websocketpp::server<websocketpp::config::asio> server;
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace websocket = beast::websocket;
-namespace net = boost::asio;
+namespace _net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 
 void beastFail(beast::error_code error, const char* what) {
@@ -46,6 +46,13 @@ public:
 				shared_from_this()
 		));
 	}
+
+	void syncWrite(std::string message) {
+		_ws.write(_net::buffer(message));
+	}
+
+
+private:
 
 	void onRun() {
 		_ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::server));
@@ -82,11 +89,6 @@ public:
 		if (error)
 			return beastFail(error, "Read");
 
-		//*message parsing*
-		//std::string request((char*)_buffer.data().data());
-		//std::cout << request << std::endl; 
-		//std::string response = "response from server";
-		//parser(request, response);
 		_ws.text(_ws.got_text());
 
 		std::string str = beast::buffers_to_string(_buffer.data());
@@ -96,7 +98,6 @@ public:
 		beast::flat_buffer b;
 		beast::ostream(b) << str;
 		
-
 		_ws.async_write(b.data(), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
 	}
 
@@ -122,9 +123,9 @@ class BeastWebSocket : public std::enable_shared_from_this<BeastWebSocket> {
 	tcp::acceptor acceptor;
 
 public:
-	BeastWebSocket(boost::asio::io_context& _ioc, tcp::endpoint endpoint, std::function<void(std::string, std::string&)> _parser) : ioc(_ioc), acceptor(ioc) {
+	BeastWebSocket(boost::asio::io_context& _ioc, tcp::endpoint endpoint, AudioServer *audioServer) : ioc(_ioc), acceptor(ioc) {
 		beast::error_code error;
-		parser = _parser;
+		//parser = _parser;
 		acceptor.open(endpoint.protocol(), error);
 		acceptor.set_option(boost::asio::socket_base::reuse_address(true), error);
 		acceptor.bind(endpoint, error);
@@ -138,15 +139,28 @@ public:
 	void doAccept() {
 		acceptor.async_accept(boost::asio::make_strand(ioc), beast::bind_front_handler(&BeastWebSocket::onAccept, shared_from_this()));
 	}
+
 	void onAccept(beast::error_code error, tcp::socket socket) {
 
-		std::make_shared<BeastSession>(std::move(socket), parser)->run();
+		auto connection = std::make_shared<BeastSession>(std::move(socket), parser);
+		
+		connections.push_back(connection);
+
+		connection->run();
 
 		doAccept();
 	}
 
+	void notify(const std::string& message) {
+		for (auto& con : connections)
+			con->syncWrite(message);
+	}
+
 private:
 
-	std::function<void(std::string, std::string&)> parser;
+	std::function<void(std::string, std::string&)> parser = [&](std::string request, std::string& response) {
+		notify("NOTIFICATION");
+	};
+	std::vector<std::shared_ptr<BeastSession>> connections;
 
 };
