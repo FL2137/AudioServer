@@ -27,19 +27,15 @@ public:
 		options.set(pgfe::Communication_mode::net);
 
 		std::getline(file, creds);
-		std::cout << creds << std::endl;
 		options.set_hostname(creds);
 
 		std::getline(file, creds);
-		std::cout << creds << std::endl;
 		options.set_database(creds);
 
 		std::getline(file, creds);
-		std::cout << creds << std::endl;
 		options.set_username(creds);
 
 		std::getline(file, creds);
-		std::cout << creds << std::endl;
 		options.set_password(creds);
 
 		//making the connection
