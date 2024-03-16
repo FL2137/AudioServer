@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /dmitigr
 /dbCreds.txt
+/SHA256.cpp
+/SHA256.hpp
