@@ -93,15 +93,16 @@ private:
 class TcpServer {
 public:
 
-    TcpServer(boost::asio::io_context& _io_context, std::string address, int port)
+    TcpServer(boost::asio::io_context& _io_context, std::string address, int port, std::function<void(std::string, std::string&, tcp::endpoint*)> _requestParser)
         : io_context(_io_context), acceptor(io_context, tcp::endpoint(boost::asio::ip::make_address_v4(address), port))
     {
+        this->requestParser = _requestParser;
         startAccept();
     }
 
     static void asyncServer(std::string address, int port, void (*f)(std::string, std::string&, tcp::endpoint*)) {
         boost::asio::io_context ioc;
-        TcpServer server(ioc, address, port);
+        TcpServer server(ioc, address, port, f);
         ioc.run();
     }
 
@@ -110,7 +111,6 @@ public:
             con->socket().write_some(boost::asio::buffer(notification));
         }*/
     }
-
         
     void setParsingFunction(std::function<void(std::string, std::string&, tcp::endpoint*)> _requestParser) {
         requestParser = _requestParser;
@@ -125,7 +125,6 @@ private:
         //connections.push_back(TcpConnection::create(io_context, requestParser));
 
         newConnection = TcpConnection::create(io_context, requestParser);
-
 
         acceptor.async_accept(newConnection->socket(),
             boost::bind(&TcpServer::handleAccept, this, newConnection, boost::asio::placeholders::error));
