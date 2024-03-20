@@ -14,9 +14,7 @@
 int main() {
   
 
-    getchar();
 
-    exit(0);
     /*
     const auto address = boost::asio::ip::make_address("192.168.1.109");
     int port = 3005;
