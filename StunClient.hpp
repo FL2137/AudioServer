@@ -37,14 +37,24 @@ private:
 		const int32_t magicCookie = htonl(0x2112A442);
 		std::array<unsigned char, 12> transactionID = {0};
 	};
+
+
 #pragma pack(pop)
+
+
+
+#pragma pack(push, 1)
+	struct StunAttribute {
+		int16_t type;
+		int16_t len;
+		int32_t value;
+	};
+#pragma pack(pop)
+
 
 #pragma pack(push, 1)
 	struct StunResponse {
 
 	};
 #pragma pack(pop)
-
-
-
 };
