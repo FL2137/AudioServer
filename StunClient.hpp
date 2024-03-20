@@ -54,7 +54,12 @@ private:
 
 #pragma pack(push, 1)
 	struct StunResponse {
-
+		int16_t messageType;
+		int16_t messageLen;
+		int32_t magicCookie;
+		std::array<unsigned char, 12> transactionID;
+		
+		std::array<StunAttribute, 100> attributes;
 	};
 #pragma pack(pop)
 };
