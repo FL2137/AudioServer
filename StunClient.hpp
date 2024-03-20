@@ -1,5 +1,6 @@
 #include <iostream>
 #include <boost/asio.hpp>
+#include <boost/asio/ip/udp.hpp>
 #include <array>
 #include <stdint.h>
 #include <string>
@@ -7,14 +8,62 @@
 
 class StunClient {
 
-
 private:
+#define BINDING_RESPONSE 0x0101
+
+
+
+public:
 
 	StunClient() {
-
 	}
 
+	std::string getExternalAddress() {
+		using boost::asio::ip::udp;
+		
+		boost::asio::io_context ioc;
+		udp::resolver resolver(ioc);
+		udp::endpoint stunServerEndpoint = *resolver.resolve(udp::v4(), "stun2.l.google.com", "3478").begin();
+		udp::socket socket(ioc);
 
+		socket.open(udp::v4());
+
+		try {
+			StunRequest request;
+
+			socket.send_to(boost::asio::buffer(&request, sizeof(request)), stunServerEndpoint);
+			std::array<unsigned char, 64> cresponse;
+			int receivedBytes = socket.receive_from(boost::asio::buffer(cresponse), stunServerEndpoint);
+
+			StunResponse* stunResp = reinterpret_cast<StunResponse*>(&cresponse);
+
+			//check response validity
+
+			if (stunResp->messageType != BINDING_RESPONSE) {
+				throw std::exception("Stun response type indicates invalid request");
+			}
+
+			if (stunResp->transactionID == request.transactionID) {
+				throw std::exception("Transaction ids dont match");
+			}
+
+			if (stunResp->magicCookie == request.magicCookie) {
+				throw std::exception("Magic cookies dont match...?");
+			}
+
+
+			std::string address = "";
+
+
+
+
+		}
+		catch(const std::exception &e) {
+			std::cout << e.what() << std::endl;
+		}
+	}
+
+private:
 
 //baisc STUN message formats
 #pragma pack(push, 1)
@@ -37,10 +86,7 @@ private:
 		const int32_t magicCookie = htonl(0x2112A442);
 		std::array<unsigned char, 12> transactionID = {0};
 	};
-
-
 #pragma pack(pop)
-
 
 
 #pragma pack(push, 1)
@@ -59,7 +105,8 @@ private:
 		int32_t magicCookie;
 		std::array<unsigned char, 12> transactionID;
 		
-		std::array<StunAttribute, 100> attributes;
+		StunAttribute att1;
+		StunAttribute att2;
 	};
 #pragma pack(pop)
 };
