@@ -10,11 +10,17 @@
 #include <random>
 #include <math.h>
 #include <array>
+#include "StunClient.hpp"
 
 int main() {
-  
+
+    StunClient stc;
+    stc.getExternalAddress();
 
 
+    getchar();
+
+    exit(0);
     /*
     const auto address = boost::asio::ip::make_address("192.168.1.109");
     int port = 3005;
