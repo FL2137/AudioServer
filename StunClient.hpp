@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -18,50 +19,9 @@ public:
 	StunClient() {
 	}
 
-	std::string getExternalAddress() {
-		using boost::asio::ip::udp;
-		
-		boost::asio::io_context ioc;
-		udp::resolver resolver(ioc);
-		udp::endpoint stunServerEndpoint = *resolver.resolve(udp::v4(), "stun2.l.google.com", "3478").begin();
-		udp::socket socket(ioc);
-
-		socket.open(udp::v4());
-
-		try {
-			StunRequest request;
-
-			socket.send_to(boost::asio::buffer(&request, sizeof(request)), stunServerEndpoint);
-			std::array<unsigned char, 64> cresponse;
-			int receivedBytes = socket.receive_from(boost::asio::buffer(cresponse), stunServerEndpoint);
-
-			StunResponse* stunResp = reinterpret_cast<StunResponse*>(&cresponse);
-
-			//check response validity
-
-			if (stunResp->messageType != BINDING_RESPONSE) {
-				throw std::exception("Stun response type indicates invalid request");
-			}
-
-			if (stunResp->transactionID == request.transactionID) {
-				throw std::exception("Transaction ids dont match");
-			}
-
-			if (stunResp->magicCookie == request.magicCookie) {
-				throw std::exception("Magic cookies dont match...?");
-			}
-
-
-			std::string address = "";
-
-
-
-
-		}
-		catch(const std::exception &e) {
-			std::cout << e.what() << std::endl;
-		}
-	}
+	std::string getExternalAddress();
+        
+	
 
 private:
 
@@ -73,11 +33,14 @@ private:
 			//generate random transaction ID
 			
 			std::random_device device;
-			std::mt19937 generator(device);
-			std::uniform_int_distribution<unsigned char> distribution(0, 255);
+			std::mt19937 generator(device());
+			std::uniform_int_distribution<int> distribution(0, 255);
 			
+			//yh
+			srand(time(NULL));
+
 			for (int i = 0; i < 12; i++) {
-				transactionID[i] = distribution(generator);
+				transactionID[i] = rand() % 256;
 			}
 		}
 
@@ -93,7 +56,8 @@ private:
 	struct StunAttribute {
 		int16_t type;
 		int16_t len;
-		int32_t value;
+		int32_t port;
+		int32_t address;
 	};
 #pragma pack(pop)
 
@@ -104,9 +68,7 @@ private:
 		int16_t messageLen;
 		int32_t magicCookie;
 		std::array<unsigned char, 12> transactionID;
-		
-		StunAttribute att1;
-		StunAttribute att2;
+		StunAttribute attribXORMAPPEDADDRESS;
 	};
 #pragma pack(pop)
 };
