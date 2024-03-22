@@ -3,15 +3,11 @@
 //this is bad because it returns the address for a socket that isnt binded to it anymore :REDO
 std::string StunClient::getExternalAddress(udp::socket *socket, udp::endpoint *ep) {
 
-    udp::endpoint ep = *resolver.resolve(udp::v4(), "stun2.l.google.com", "3478").begin();
-    udp::socket sock(_ioc);
-
-
     StunRequest sr;
 
     try {
         boost::system::error_code err;
-        sock.send_to(boost::asio::buffer(&sr, sizeof(sr)), ep, NULL, err);
+        socket->send_to(boost::asio::buffer(&sr, sizeof(sr)), *ep, NULL, err);
         std::cout << err.message() << std::endl;
     }
     catch (std::exception e) {
@@ -22,10 +18,10 @@ std::string StunClient::getExternalAddress(udp::socket *socket, udp::endpoint *e
     udp::endpoint sep(boost::asio::ip::make_address("192.168.1.109"), 50687);
 
     boost::system::error_code er;
-    int rcv = sock.receive_from(boost::asio::buffer(buffer), ep, NULL, er);
+    int rcv = socket->receive_from(boost::asio::buffer(buffer), *ep, NULL, er);
     std::cout << er.message() << std::endl;
 
-    sock.send_to(boost::asio::buffer(buffer), sep);
+    socket->send_to(boost::asio::buffer(buffer), sep);
 
 
     StunResponse* srsp = reinterpret_cast<StunResponse*>(&buffer);
