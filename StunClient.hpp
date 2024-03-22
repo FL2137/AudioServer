@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <string>
 #include <random>
+#include <tuple>
 
 using boost::asio::ip::udp;
 
@@ -19,7 +20,7 @@ public:
 	StunClient() {
 	}
 
-	std::string getExternalAddress(udp::socket *socket, udp::endpoint *ep);
+	std::tuple<std::string, std::string> getExternalAddress(udp::socket *socket, udp::endpoint *ep);
         
 	
 

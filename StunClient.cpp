@@ -1,7 +1,7 @@
 #include "StunClient.hpp"
 
 //this is bad because it returns the address for a socket that isnt binded to it anymore :REDO
-std::string StunClient::getExternalAddress(udp::socket *socket, udp::endpoint *ep) {
+std::tuple<std::string, std::string> StunClient::getExternalAddress(udp::socket *socket, udp::endpoint *ep) {
 
     StunRequest sr;
 
@@ -45,9 +45,7 @@ std::string StunClient::getExternalAddress(udp::socket *socket, udp::endpoint *e
     }
     address.pop_back();//get rid of the last dot
 
-    std::cout << std::to_string(ntohl(srsp->attribXORMAPPEDADDRESS.port) & 0xff) << std::endl;
-    std::cout << std::to_string((ntohl(srsp->attribXORMAPPEDADDRESS.port) >> 8) & 0xff) << std::endl;
-
+    port = std::to_string((ntohl(srsp->attribXORMAPPEDADDRESS.port) & 0xffFF) ^ (srsp->magicCookie >> 16));
 
 
 
