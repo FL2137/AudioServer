@@ -47,7 +47,5 @@ std::tuple<std::string, std::string> StunClient::getExternalAddress(udp::socket 
 
     port = std::to_string((ntohl(srsp->attribXORMAPPEDADDRESS.port) & 0xffFF) ^ (srsp->magicCookie >> 16));
 
-
-
-    return address + ":" + port;
+    return std::make_tuple(address, port);
 }
