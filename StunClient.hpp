@@ -7,19 +7,19 @@
 #include <string>
 #include <random>
 
+using boost::asio::ip::udp;
+
 class StunClient {
 
 private:
 #define BINDING_RESPONSE 0x0101
-
-
 
 public:
 
 	StunClient() {
 	}
 
-	std::string getExternalAddress();
+	std::string getExternalAddress(udp::socket *socket, udp::endpoint *ep);
         
 	
 
