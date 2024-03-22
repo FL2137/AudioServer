@@ -1,5 +1,6 @@
 #include "StunClient.hpp"
 
+//this is bad because it returns the address for a socket that isnt binded to it anymore :REDO
 std::string StunClient::getExternalAddress() {
     using boost::asio::ip::udp;
 
@@ -9,7 +10,6 @@ std::string StunClient::getExternalAddress() {
     udp::endpoint ep = *resolver.resolve(udp::v4(), "stun2.l.google.com", "3478").begin();
     udp::socket sock(_ioc);
 
-    sock.open(udp::v4());
 
     StunRequest sr;
 
