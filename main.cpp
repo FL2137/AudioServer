@@ -12,11 +12,20 @@
 #include <array>
 #include "StunClient.hpp"
 
+using boost::asio::ip::udp;
+
 int main() {
 
     StunClient stc;
-    stc.getExternalAddress();
 
+    boost::asio::io_context ioc;
+    udp::resolver resolver(ioc);
+    udp::endpoint ep = *resolver.resolve("stun2.l.google.com", "3478").begin();
+    udp::endpoint localEndpoint(boost::asio::ip::make_address("192.168.1.109"), 3007);
+
+    udp::socket socket(ioc, localEndpoint);
+
+    std::cout << std::get<0>(stc.getExternalAddress(&socket, &ep));
 
     getchar();
 
