@@ -18,7 +18,10 @@ std::tuple<std::string, std::string> StunClient::getExternalAddress(udp::socket 
     udp::endpoint sep(boost::asio::ip::make_address("192.168.1.109"), 50687);
 
     boost::system::error_code er;
-    int rcv = socket->receive_from(boost::asio::buffer(buffer), *ep, NULL, er);
+
+    udp::endpoint remoteEp;
+
+    int rcv = socket->receive_from(boost::asio::buffer(buffer), remoteEp, NULL, er);
     std::cout << er.message() << std::endl;
 
     socket->send_to(boost::asio::buffer(buffer), sep);
