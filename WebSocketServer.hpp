@@ -133,6 +133,10 @@ public:
 		acceptor.set_option(boost::asio::socket_base::reuse_address(true), error);
 		acceptor.bind(endpoint, error);
 		acceptor.listen(boost::asio::socket_base::max_listen_connections, error);
+
+		if (error.value() != 0) {
+			std::cerr << error.message() << std::endl;
+		}
 	}
 
 	void run() {
@@ -164,7 +168,7 @@ private:
 	std::function<void(std::string, std::string&)> parser = [&](std::string request, std::string& response) {
 		json jsRequest = json::parse(request.c_str());
 
-		if (jsRequest["type"] == "CREATEROOM") {
+		if (jsRequest["type"] == "CREATE_ROOM") {
 
 			int uid = jsRequest["uid"].get<int>();
 
@@ -180,7 +184,7 @@ private:
 			}
 			return;
 		}
-		else if (jsRequest["type"] == "JOINROOM") {
+		else if (jsRequest["type"] == "JOIN_ROOM") {
 
 			int uid = jsRequest["uid"].get<int>();
 			int roomId = jsRequest["rid"].get<int>();
@@ -215,7 +219,7 @@ private:
 
 			return;
 		}
-		else if (jsRequest["type"] == "SETAVATAR") {
+		else if (jsRequest["type"] == "SET_AVATAR") {
 			int uid = jsRequest["uid"].get<int>();
 
 			if (audioServer->setAvatar(uid, jsRequest["data"].dump())) {
@@ -230,7 +234,7 @@ private:
 			}
 			return;
 		}
-		else if (jsRequest["type"] == "QUITROOM") {
+		else if (jsRequest["type"] == "QUIT_ROOM") {
 			int uid = jsRequest["uid"].get<int>();
 			int roomId = jsRequest["rid"].get<int>();
 
@@ -242,11 +246,11 @@ private:
 			}
 			return;
 		}
-		else if (jsRequest["type"] == "ROOMCHECK") {
+		else if (jsRequest["type"] == "ROOM_CHECK") {
 			int uid = jsRequest["uid"].get<int>();
 			int rid = jsRequest["rid"].get<int>();
 		}
-		else if (jsRequest["type"] == "FRIENDSCHECK") {
+		else if (jsRequest["type"] == "FRIENDS_CHECK") {
 			int uid = jsRequest["uid"].get<int>();
 
 			std::vector<std::string> friends = audioServer->friendListCheck(uid);
