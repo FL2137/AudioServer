@@ -1,13 +1,26 @@
 #include "AudioServer.hpp"
 
+bool AudioServer::setUserEndpoint(int uid, std::string address, std::string port) {
+	std::vector<User>::iterator iter;
+	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
+		User user = *iter;
+
+	}
+}
 
 int AudioServer::createRoom(int uid) {
 	std::vector<User>::iterator iter;
 
 	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
 		User host = *iter;
-		std::cout << "uid:" << host.uid << std::endl;
-		return lastRid++;
+
+		Room room(host);
+
+		room.id = lastRid++;
+		room.addUser(*iter);
+
+		activeRooms.push_back(room);
+		return room.id;
 	}
 	else {
 		lastError = "This user is not logged in";

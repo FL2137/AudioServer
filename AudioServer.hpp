@@ -29,6 +29,7 @@ public:
     bool joinRoom(int roomId, int uid);
     bool quitRoom(int roomId, int uid);
     bool setAvatar(int uid, std::string data);
+    bool setUserEndpoint(int uid, std::string address, std::string port);
 
     std::vector<std::string> friendListCheck(int uid);
     std::vector<std::string> roomCheck(int roomId, int uid);
@@ -53,7 +54,7 @@ public:
 
 private:
 
-    std::vector<Room> existingRooms = {};
+    std::vector<Room> activeRooms = {};
 };
 
 
