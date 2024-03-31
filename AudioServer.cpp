@@ -59,7 +59,7 @@ bool AudioServer::joinRoom(int roomId, int uid) {
 	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
 		User user = *iter;
 		std::vector<Room>::iterator roomiter;
-		if ((roomiter = std::find(existingRooms.begin(), existingRooms.end(), roomId)) != existingRooms.end()) {
+		if ((roomiter = std::find(activeRooms.begin(), activeRooms.end(), roomId)) != activeRooms.end()) {
 			roomiter->addUser(user);
 			return true;
 		}
@@ -80,7 +80,7 @@ bool AudioServer::quitRoom(int roomId, int uid) {
 	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
 		User user = *iter;
 		std::vector<Room>::iterator roomiter;
-		if ((roomiter = std::find(existingRooms.begin(), existingRooms.end(), roomId)) != existingRooms.end()) {
+		if ((roomiter = std::find(activeRooms.begin(), activeRooms.end(), roomId)) != activeRooms.end()) {
 			roomiter->kick(uid);
 			return true;
 		}
@@ -99,8 +99,8 @@ bool AudioServer::quitRoom(int roomId, int uid) {
 std::vector<std::string> AudioServer::roomCheck(int roomId, int uid) {
 	std::vector<std::string> roomUsers = {};
 	std::vector<Room>::iterator iter;
-	iter = std::find(existingRooms.begin(), existingRooms.end(), uid);
-	if (iter != existingRooms.end()) {
+	iter = std::find(activeRooms.begin(), activeRooms.end(), uid);
+	if (iter != activeRooms.end()) {
 		for (User u : iter->users) {
 			roomUsers.push_back(u.nickname);
 		}
@@ -122,8 +122,8 @@ std::vector<std::string> AudioServer::friendListCheck(int uid) {
 }
 
 void AudioServer::notifyRoom(int roomId) {
-	std::vector<Room>::iterator iter = std::find(existingRooms.begin(), existingRooms.end(), roomId);
-	if (iter != existingRooms.end()) {
+	std::vector<Room>::iterator iter = std::find(activeRooms.begin(), activeRooms.end(), roomId);
+	if (iter != activeRooms.end()) {
 		
 		boost::asio::io_context ioc;
 
