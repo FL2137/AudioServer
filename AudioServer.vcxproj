@@ -137,6 +137,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="SHA256.cpp" />
+    <ClCompile Include="StunClient.cpp" />
+    <ClCompile Include="StunClient.hpp" />
     <ClCompile Include="User.cpp" />
   </ItemGroup>
   <ItemGroup>

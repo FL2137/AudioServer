@@ -33,6 +33,12 @@
     <ClCompile Include="SHA256.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StunClient.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StunClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

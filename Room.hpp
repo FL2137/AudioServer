@@ -12,7 +12,7 @@ public:
     }
 
     int id;
-    int size;
+    int size = 4;
 
     inline void kick(int uid) {
         users.erase(std::remove(users.begin(), users.end(), uid), users.end());

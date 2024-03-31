@@ -16,22 +16,9 @@ using boost::asio::ip::udp;
 
 int main() {
 
-    StunClient stc;
-
-    boost::asio::io_context ioc;
-    udp::resolver resolver(ioc);
-    udp::endpoint ep = *resolver.resolve("stun2.l.google.com", "3478").begin();
-    udp::endpoint localEndpoint(boost::asio::ip::make_address("192.168.1.109"), 3007);
-
-    udp::socket socket(ioc, localEndpoint);
-
-    std::cout << std::get<0>(stc.getExternalAddress(&socket, &ep));
-
-    getchar();
-
-    exit(0);
-    /*
-    const auto address = boost::asio::ip::make_address("192.168.1.109");
+   
+    
+    const auto address = boost::asio::ip::make_address("192.168.0.109");
     int port = 3005;
     int threads = 1;
 
@@ -55,5 +42,4 @@ int main() {
     delete audioServer;
 
     return 0;
-    */
 }

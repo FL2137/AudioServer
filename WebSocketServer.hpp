@@ -71,7 +71,7 @@ private:
 		if (error) {
 			return beastFail(error, "accept");
 		}
-		std::cout << "Accepted connection\n";
+		//std::cout << "Accepted connection\n";
 		doRead();
 	}
 
@@ -80,7 +80,6 @@ private:
 	}
 
 	void readHandler(beast::error_code error, size_t bytesTransferred) {
-		std::cout << "::readHandler() \n";
 
 		boost::ignore_unused(bytesTransferred);
 		if (error == websocket::error::closed)
@@ -201,6 +200,21 @@ private:
 				response = js.dump();
 			}
 			return;
+		}
+		else if (jsRequest["type"] == "SET_ENDPOINT") {
+			std::cout << "SET_ENDPOINT\n";
+			int uid = jsRequest["uid"].get<int>();
+			if (audioServer->setUserEndpoint(uid, jsRequest["address"], jsRequest["port"])) {
+				json js;
+				js["ok"] = "OK";
+				response = js.dump();
+			}
+			else {
+				json js;
+				js["ok"] = audioServer->lastError;
+				response = js.dump();
+			}
+
 		}
 		else if (jsRequest["type"] == "LOGIN") {
 			if (audioServer->userConnected(jsRequest["data"].dump())) {

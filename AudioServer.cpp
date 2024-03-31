@@ -4,15 +4,22 @@ bool AudioServer::setUserEndpoint(int uid, std::string address, std::string port
 	std::vector<User>::iterator iter;
 	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
 		User user = *iter;
-
+		(*iter).udpEndpoint = udp::endpoint(boost::asio::ip::make_address(address), std::stoi(port));
+		std::cout << "User " << (*iter).uid << " " << (*iter).udpEndpoint.address() << ":" << (*iter).udpEndpoint.port() << std::endl;
+		return true;
 	}
+
+	lastError = "User not found";
+	return false;
 }
 
 int AudioServer::createRoom(int uid) {
+
 	std::vector<User>::iterator iter;
 
 	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
 		User host = *iter;
+		std::cout << host.nickname << std::endl;
 
 		Room room(host);
 
@@ -20,12 +27,14 @@ int AudioServer::createRoom(int uid) {
 		room.addUser(*iter);
 
 		activeRooms.push_back(room);
+
 		return room.id;
 	}
 	else {
 		lastError = "This user is not logged in";
 		return 0;
 	}
+
 }
 
 bool AudioServer::userConnected(std::string userData) {
