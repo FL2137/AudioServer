@@ -4,7 +4,11 @@ bool AudioServer::setUserEndpoint(int uid, std::string address, std::string port
 	std::vector<User>::iterator iter;
 	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
 		User user = *iter;
+		std::cout << user.nickname << address << ":--" << port <<  std::endl;
+
 		(*iter).udpEndpoint = udp::endpoint(boost::asio::ip::make_address(address), std::stoi(port));
+
+		std::cout << "hetghererere\n";
 		std::cout << "User " << (*iter).uid << " " << (*iter).udpEndpoint.address() << ":" << (*iter).udpEndpoint.port() << std::endl;
 		return true;
 	}
@@ -150,12 +154,11 @@ void AudioServer::notifyRoom(int roomId) {
 	}
 }
 
-void AudioServer::notifyFriends(int uid, const std::vector<User> &_loggedUsers) {
+void AudioServer::notifyFriends(int uid, const std::vector<User> &_loggedUsers, std::string notifMessage) {
 
 	boost::asio::io_context ioc;
 	tcp::socket socket(ioc);
 	ioc.run();
-
 
 	json js;
 	js["users"] = json::array();

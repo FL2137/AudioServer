@@ -43,7 +43,7 @@ public:
 
     //these functions will be run in a detached thread, so they have to be passed everything they need
     void notifyRoom(int roomId);
-    void notifyFriends(int uid, const std::vector<User>& _loggedUsers);
+    void notifyFriends(int uid, const std::vector<User>& _loggedUsers, std::string notifMessage);
 
     static std::string base64_encode(const std::string& in);
 
