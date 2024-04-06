@@ -55,7 +55,7 @@ public:
 
 	void syncWrite(const std::string& message) {
 		boost::asio::post(_ws.get_executor(), [self = shared_from_this(), this, msg = std::move(message)] {
-
+			do_post_message(std::move(msg));
 		});
 	}
 
@@ -100,27 +100,32 @@ private:
 		std::string str = beast::buffers_to_string(_buffer.data());
 		
 		parser(str, str);
-
-		beast::flat_buffer b;
-		beast::ostream(b) << str;
 		
-		_ws.async_write(b.data(), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
+		//_ws.async_write(b.data(), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
+
+		do_post_message(str);
+
+		doRead();
 	}
 
 
 	void do_post_message(std::string msg) {
 		outbox.push_back(std::move(msg));
-		if (outbox.size() == 1) {
-
-		}
+		if (outbox.size() == 1)
+			doWriteLoop();
 	}
 
 	void doWriteLoop() {
 		if (outbox.empty())
 			return;
 
-		_ws.async_write(boost::asio::buffer(outbox.front()), [self = shared_from_this(), this](beast::error_code error, size_t) {
-			
+		_ws.async_write(boost::asio::buffer(outbox.front()), [self = shared_from_this(), this](beast::error_code error, size_t bytesTrans) {
+			boost::ignore_unused(bytesTrans);
+			if (error)
+				return beastFail(error, "AsyncWrite");
+
+			outbox.pop_front();
+			doWriteLoop();
 		});
 	}
 
@@ -187,13 +192,18 @@ public:
 		doAccept();
 	}
 
-	void notify(const std::string& message) {
+
+	void doNotify(std::string const& message) {
 		for (auto& con : connections) {
 			std::cout << con << " -- " << currentConnection << std::endl;
 			if (con != currentConnection) {
 				con->syncWrite(message);
 			}
 		}
+	}
+
+	void notify(std::string message) {
+		boost::asio::post(acceptor.get_executor(), beast::bind_front_handler(&BeastWebSocket::doNotify, shared_from_this(), std::move(message)));
 	}
 
 private:
