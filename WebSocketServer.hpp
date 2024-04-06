@@ -17,6 +17,10 @@
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
 
+#include <deque>
+#include <thread>
+#include <mutex>
+
 typedef websocketpp::server<websocketpp::config::asio> server;
 
 namespace beast = boost::beast;
@@ -30,8 +34,10 @@ void beastFail(beast::error_code error, const char* what) {
 }
 
 class BeastSession : public std::enable_shared_from_this<BeastSession> {
+	
 	websocket::stream<beast::tcp_stream> _ws;
 	beast::flat_buffer _buffer;
+	std::mutex mainMutex;
 
 public:
 	BeastSession(tcp::socket&& socket, std::function<void(std::string, std::string&)> parser) : _ws(std::move(socket)) {
@@ -47,10 +53,11 @@ public:
 		));
 	}
 
-	void syncWrite(std::string message) {
-		_ws.write(_net::buffer(message));
-	}
+	void syncWrite(const std::string& message) {
+		boost::asio::post(_ws.get_executor(), [self = shared_from_this(), this, msg = std::move(message)] {
 
+		});
+	}
 
 private:
 
@@ -100,6 +107,28 @@ private:
 		_ws.async_write(b.data(), beast::bind_front_handler(&BeastSession::writeHandler, shared_from_this()));
 	}
 
+
+	void do_post_message(std::string msg) {
+		outbox.push_back(std::move(msg));
+		if (outbox.size() == 1) {
+
+		}
+	}
+
+	void doWriteLoop() {
+		if (outbox.empty())
+			return;
+
+		_ws.async_write(boost::asio::buffer(outbox.front()), [self = shared_from_this(), this](beast::error_code error, size_t) {
+			
+		});
+	}
+
+	std::deque<std::string> outbox;
+
+
+public:
+
 	void writeHandler(beast::error_code error, size_t bytesTransferred) {
 		boost::ignore_unused(bytesTransferred);
 
@@ -138,6 +167,7 @@ public:
 		}
 	}
 
+
 	void run() {
 		doAccept();
 	}
@@ -148,23 +178,33 @@ public:
 
 	void onAccept(beast::error_code error, tcp::socket socket) {
 
-		auto connection = std::make_shared<BeastSession>(std::move(socket), parser);
+		currentConnection = std::make_shared<BeastSession>(std::move(socket), parser);
 		
-		connections.push_back(connection);
-
-		connection->run();
+		currentConnection->run();
+		
+		connections.push_back(currentConnection);
 
 		doAccept();
 	}
 
 	void notify(const std::string& message) {
-		for (auto& con : connections)
-			con->syncWrite(message);
+		for (auto& con : connections) {
+			std::cout << con << " -- " << currentConnection << std::endl;
+			if (con != currentConnection) {
+				con->syncWrite(message);
+			}
+		}
 	}
 
 private:
 
 	std::function<void(std::string, std::string&)> parser = [&](std::string request, std::string& response) {
+		
+		if (request == "PING") {
+			response = "PONG";
+			return;
+		}
+		
 		json jsRequest = json::parse(request.c_str());
 
 		if (jsRequest["type"] == "CREATE_ROOM") {
@@ -222,8 +262,10 @@ private:
 				js["ok"] = "OK";
 				js["uid"] = audioServer->lastUid - 1;
 				response = js.dump();
-				/*std::thread s(&AudioServer::notifyFriends, &audioServer, audioServer.lastUid - 1, audioServer.loggedUsers);
-				s.detach();*/
+
+				notify("NOTIFY_FRIENDS/" + std::to_string(audioServer->lastUid - 1));
+				//std::thread s(&AudioServer::notifyFriends, audioServer->lastUid - 1, audioServer->loggedUsers);
+				//s.detach();
 			}
 			else {
 				json js;
@@ -278,4 +320,7 @@ private:
 	};
 	std::vector<std::shared_ptr<BeastSession>> connections;
 	AudioServer* audioServer;
+
+	std::shared_ptr<BeastSession> currentConnection;
+
 };

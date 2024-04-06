@@ -33,9 +33,18 @@ int main() {
     for (auto i = threads - 1; i > 0; --i) {
         threadV.emplace_back([&ioc] {ioc.run(); });
     }
+    
+    try {
+        ioc.run();
+    }
+    catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
+        getchar();
+    }
 
-    ioc.run();
-
+    for (int i = 0; i < threads; i++) {
+        threadV[i].join();
+    }
 
     delete audioServer;
     return 0;
