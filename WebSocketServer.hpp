@@ -129,7 +129,7 @@ private:
 		});
 	}
 
-	std::deque<std::string> outbox;
+	std::deque<std::string> outbox = {};
 
 
 public:
@@ -273,7 +273,10 @@ private:
 				js["uid"] = audioServer->lastUid - 1;
 				response = js.dump();
 
-				notify("NOTIFY_FRIENDS/" + std::to_string(audioServer->lastUid - 1));
+				json notification;
+				notification["type"] = "NOTIFY_FRIENDS";
+				notification["uid"] = audioServer->lastUid - 1;
+				notify(notification.dump());
 				//std::thread s(&AudioServer::notifyFriends, audioServer->lastUid - 1, audioServer->loggedUsers);
 				//s.detach();
 			}
@@ -315,6 +318,10 @@ private:
 		else if (jsRequest["type"] == "ROOM_CHECK") {
 			int uid = jsRequest["uid"].get<int>();
 			int rid = jsRequest["rid"].get<int>();
+			json js;
+			js["type"] = "RES_ROOMCHECK";
+			js["ok"] = "OK";
+			response = js.dump();
 		}
 		else if (jsRequest["type"] == "FRIENDS_CHECK") {
 			int uid = jsRequest["uid"].get<int>();
