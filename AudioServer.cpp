@@ -55,7 +55,7 @@ bool AudioServer::userConnected(std::string userData) {
 
 	try {
 		std::string nickname = data["nickname"].get<std::string>();
-		std::string password = data["password"];
+		std::string password = data["password"].get<std::string>();
 		std::cout << "nick: " << nickname << " pass: " << password << std::endl;
 		User user(nickname, lastUid++);
 		loggedUsers.push_back(user);
