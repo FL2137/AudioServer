@@ -105,12 +105,14 @@ private:
 
 		do_post_message(str);
 
+		_buffer.consume(_buffer.size());
+
 		doRead();
 	}
 
-
 	void do_post_message(std::string msg) {
 		outbox.push_back(std::move(msg));
+
 		if (outbox.size() == 1)
 			doWriteLoop();
 	}
@@ -125,6 +127,7 @@ private:
 				return beastFail(error, "AsyncWrite");
 
 			outbox.pop_front();
+
 			doWriteLoop();
 		});
 	}
@@ -166,6 +169,8 @@ public:
 		acceptor.set_option(boost::asio::socket_base::reuse_address(true), error);
 		acceptor.bind(endpoint, error);
 		acceptor.listen(boost::asio::socket_base::max_listen_connections, error);
+
+		std::cout << "Server running on " << acceptor.local_endpoint().address().to_string() << ":" << acceptor.local_endpoint().port() << std::endl;
 
 		if (error.value() != 0) {
 			std::cerr << error.message() << std::endl;
@@ -214,6 +219,8 @@ private:
 			response = "PONG";
 			return;
 		}
+
+		std::cout << request << std::endl;
 		
 		json jsRequest = json::parse(request.c_str());
 
@@ -276,7 +283,7 @@ private:
 				json notification;
 				notification["type"] = "NOTIFY_FRIENDS";
 				notification["uid"] = audioServer->lastUid - 1;
-				notify(notification.dump());
+				//notify(notification.dump());
 				//std::thread s(&AudioServer::notifyFriends, audioServer->lastUid - 1, audioServer->loggedUsers);
 				//s.detach();
 			}
@@ -319,7 +326,7 @@ private:
 			int uid = jsRequest["uid"].get<int>();
 			int rid = jsRequest["rid"].get<int>();
 			json js;
-			js["type"] = "RES_ROOMCHECK";
+			js["type"] = "RESPONSE_ROOMCHECK";
 			js["ok"] = "OK";
 			response = js.dump();
 		}
