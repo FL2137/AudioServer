@@ -18,7 +18,7 @@ int main() {
 
     const auto address = boost::asio::ip::make_address("192.168.0.109");
     int port = 3005;
-    int threads = 4;
+    int threads = 1;
 
     boost::asio::io_context ioc{ threads };
 
