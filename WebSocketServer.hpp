@@ -233,6 +233,7 @@ private:
 				json js;
 				js["ok"] = "OK";
 				js["rid"] = rid;
+				js["type"] = "RESPONSE_CREATE_ROOM";
 				response = js.dump();
 			}
 			else {
