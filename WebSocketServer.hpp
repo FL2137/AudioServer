@@ -215,12 +215,12 @@ private:
 
 	std::function<void(std::string, std::string&)> parser = [&](std::string request, std::string& response) {
 		
+		std::cout << "Request: " << request << std::endl;
+		
 		if (request == "PING") {
 			response = "PONG";
 			return;
 		}
-
-		std::cout << request << std::endl;
 		
 		json jsRequest = json::parse(request.c_str());
 
@@ -265,6 +265,7 @@ private:
 				json js;
 				js["ok"] = "OK";
 				response = js.dump();
+
 			}
 			else {
 				json js;
@@ -278,12 +279,14 @@ private:
 				json js;
 				js["ok"] = "OK";
 				js["uid"] = audioServer->lastUid - 1;
+				js["type"] = "RESPONSE_LOGIN";
 				response = js.dump();
+				std::cout << "Sending back: " << response << std::endl;
 
 				json notification;
 				notification["type"] = "NOTIFY_FRIENDS";
 				notification["uid"] = audioServer->lastUid - 1;
-				//notify(notification.dump());
+				notify(notification.dump());
 				//std::thread s(&AudioServer::notifyFriends, audioServer->lastUid - 1, audioServer->loggedUsers);
 				//s.detach();
 			}
