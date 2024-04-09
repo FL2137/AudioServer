@@ -260,7 +260,6 @@ private:
 			return;
 		}
 		else if (jsRequest["type"] == "SET_ENDPOINT") {
-			std::cout << "SET_ENDPOINT\n";
 			int uid = jsRequest["uid"].get<int>();
 			if (audioServer->setUserEndpoint(uid, jsRequest["address"], jsRequest["port"])) {
 				json js;
@@ -282,7 +281,6 @@ private:
 				js["uid"] = audioServer->lastUid - 1;
 				js["type"] = "RESPONSE_LOGIN";
 				response = js.dump();
-				std::cout << "Sending back: " << response << std::endl;
 
 				json notification;
 				notification["type"] = "NOTIFY_FRIENDS";

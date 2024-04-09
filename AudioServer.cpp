@@ -4,12 +4,10 @@ bool AudioServer::setUserEndpoint(int uid, std::string address, std::string port
 	std::vector<User>::iterator iter;
 	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
 		User user = *iter;
-		std::cout << user.nickname << address << ":--" << port <<  std::endl;
 
 		(*iter).udpEndpoint = udp::endpoint(boost::asio::ip::make_address(address), std::stoi(port));
 
-		std::cout << "hetghererere\n";
-		std::cout << "User " << (*iter).uid << " " << (*iter).udpEndpoint.address() << ":" << (*iter).udpEndpoint.port() << std::endl;
+		//std::cout << "User " << (*iter).uid << " " << (*iter).udpEndpoint.address() << ":" << (*iter).udpEndpoint.port() << std::endl;
 		return true;
 	}
 
@@ -56,7 +54,6 @@ bool AudioServer::userConnected(std::string userData) {
 	try {
 		std::string nickname = data["nickname"].get<std::string>();
 		std::string password = data["password"].get<std::string>();
-		std::cout << "nick: " << nickname << " pass: " << password << std::endl;
 		User user(nickname, lastUid++);
 		loggedUsers.push_back(user);
 	}
