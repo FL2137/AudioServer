@@ -177,7 +177,6 @@ public:
 		}
 	}
 
-
 	void run() {
 		doAccept();
 	}
@@ -196,7 +195,6 @@ public:
 
 		doAccept();
 	}
-
 
 	void doNotify(std::string const& message) {
 		for (auto& con : connections) {
@@ -249,12 +247,14 @@ private:
 			if (audioServer->joinRoom(roomId, uid)) {
 				json js;
 				js["ok"] = "OK";
+				js["type"] = "RESPONSE_JOIN_ROOM";
 				response = js.dump();
 
 			}
 			else {
 				json js;
 				js["ok"] = audioServer->lastError;
+				js["type"] = "RESPONSE_JOIN_ROOM";
 				response = js.dump();
 			}
 			return;
@@ -264,12 +264,14 @@ private:
 			if (audioServer->setUserEndpoint(uid, jsRequest["address"], jsRequest["port"])) {
 				json js;
 				js["ok"] = "OK";
+				js["type"] = "RESPONSE_SET_ENDPOINT";
 				response = js.dump();
 
 			}
 			else {
 				json js;
 				js["ok"] = audioServer->lastError;
+				js["type"] = "RESPONSE_SET_ENDPOINT";
 				response = js.dump();
 			}
 
@@ -341,12 +343,13 @@ private:
 			for (const std::string& _friend : friends) {
 				js["data"].push_back(_friend);
 			}
+			js["type"] = "RESPONSE_FRIENDS_CHECK";
 			response = js.dump();
 		}
 	};
+	
 	std::vector<std::shared_ptr<BeastSession>> connections;
-	AudioServer* audioServer;
-
 	std::shared_ptr<BeastSession> currentConnection;
-
+	
+	AudioServer* audioServer;
 };
