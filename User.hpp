@@ -2,9 +2,12 @@
 #include <string>
 #include <vector>
 #include <boost/asio.hpp>
+#include <nlohmann/json.hpp>
 
 using boost::asio::ip::tcp;
 using boost::asio::ip::udp;
+
+using nlohmann::json;
 
 class User {
 
@@ -23,8 +26,6 @@ public:
     //should this be stored????
     char* avatarPicture;
 
-
-
     int uid;
 
     bool operator==(int _uid) {
@@ -33,4 +34,13 @@ public:
         else
             return false;
     }
+
+    json toJson() const {
+        json body;
+        body["nickname"] = nickname;
+        body["address"] = udpEndpoint.address().to_string();
+        body["port"] = udpEndpoint.port();
+        return body;
+    }
+
 };
