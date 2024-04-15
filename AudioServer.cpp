@@ -64,20 +64,21 @@ bool AudioServer::userConnected(std::string userData) {
 	return true;
 }
 
-bool AudioServer::joinRoom(int roomId, int uid) {
+bool AudioServer::joinRoom(int roomId, int uid, json &roomUsers) {
 	std::vector<User>::iterator iter;
 	if ((iter = std::find(loggedUsers.begin(), loggedUsers.end(), uid)) != loggedUsers.end()) {
 		User user = *iter;
 		std::vector<Room>::iterator roomiter;
 		if ((roomiter = std::find(activeRooms.begin(), activeRooms.end(), roomId)) != activeRooms.end()) {
 			roomiter->addUser(user);
+
+			roomUsers = roomiter->toJson();
 			return true;
 		}
 		else {
 			lastError = "This room doesn't exist";
 			return false;
 		}
-		return true;
 	}
 	else {
 		lastError = "This user is not logged in";

@@ -6,7 +6,8 @@ json Room::toJson() {
 
 	for (const User& user : users) {
 		json::array_t arr;
-		arr.push_back(user.nickname);
+
+		arr.push_back(user.toJson());
 		data["users"] = arr;
 	}
 	return data;

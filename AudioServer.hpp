@@ -26,7 +26,7 @@ public:
 
     bool userConnected(std::string userData);
     int createRoom(int uid);
-    bool joinRoom(int roomId, int uid);
+    bool joinRoom(int roomId, int uid, json &roomUsers);
     bool quitRoom(int roomId, int uid);
     bool setAvatar(int uid, std::string data);
     bool setUserEndpoint(int uid, std::string address, std::string port);

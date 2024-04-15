@@ -243,13 +243,20 @@ private:
 
 			int uid = jsRequest["uid"].get<int>();
 			int roomId = jsRequest["rid"].get<int>();
+			json room;
 
-			if (audioServer->joinRoom(roomId, uid)) {
+			if (audioServer->joinRoom(roomId, uid, room)) {
 				json js;
 				js["ok"] = "OK";
 				js["type"] = "RESPONSE_JOIN_ROOM";
+				js["rid"] = roomId;
+				js["room"] = room;
 				response = js.dump();
 
+				json notification;
+				notification["type"] = "NOTIFY_ROOM";
+				notification["uid"] = uid;
+				notify(notification.dump());
 			}
 			else {
 				json js;
