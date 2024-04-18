@@ -336,10 +336,24 @@ private:
 		else if (jsRequest["type"] == "ROOM_CHECK") {
 			int uid = jsRequest["uid"].get<int>();
 			int rid = jsRequest["rid"].get<int>();
-			json js;
-			js["type"] = "RESPONSE_ROOMCHECK";
-			js["ok"] = "OK";
-			response = js.dump();
+
+			json data;
+
+			if (audioServer->roomCheck(rid, uid, data)) {
+				json js;
+				js["type"] = "RESPONSE_ROOMCHECK";
+				js["ok"] = "error";
+				js["room"] = data;
+				response = js.dump();
+			}
+			else {
+				response = audioServer->lastError;
+				json js;
+				js["type"] = "RESPONSE_ROOMCHECK";
+				js["ok"] = "error";
+				response = js.dump();
+			}
+			return;
 		}
 		else if (jsRequest["type"] == "FRIENDS_CHECK") {
 			int uid = jsRequest["uid"].get<int>();
