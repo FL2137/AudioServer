@@ -32,7 +32,7 @@ public:
     bool setUserEndpoint(int uid, std::string address, std::string port);
 
     std::vector<std::string> friendListCheck(int uid);
-    std::vector<std::string> roomCheck(int roomId, int uid);
+    bool roomCheck(int roomId, int uid, json &room);
 
     std::string lastError;
 

@@ -70,9 +70,8 @@ bool AudioServer::joinRoom(int roomId, int uid, json &roomUsers) {
 		User user = *iter;
 		std::vector<Room>::iterator roomiter;
 		if ((roomiter = std::find(activeRooms.begin(), activeRooms.end(), roomId)) != activeRooms.end()) {
-			roomiter->addUser(user);
-
 			roomUsers = roomiter->toJson();
+			roomiter->addUser(user);
 			return true;
 		}
 		else {
@@ -107,19 +106,17 @@ bool AudioServer::quitRoom(int roomId, int uid) {
 	}
 }
 
-std::vector<std::string> AudioServer::roomCheck(int roomId, int uid) {
+bool AudioServer::roomCheck(int roomId, int uid, json &room) {
 	std::vector<std::string> roomUsers = {};
 	std::vector<Room>::iterator iter;
 	iter = std::find(activeRooms.begin(), activeRooms.end(), uid);
 	if (iter != activeRooms.end()) {
-		for (User u : iter->users) {
-			roomUsers.push_back(u.nickname);
-		}
-		return roomUsers;
+		room = iter->toJson();
+		return true;
 	}
 	else {
 		lastError = "This room doesn't exist";
-		return {};
+		return false;
 	}
 }
 
