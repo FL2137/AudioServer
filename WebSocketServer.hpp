@@ -326,10 +326,18 @@ private:
 			int roomId = jsRequest["rid"].get<int>();
 
 			if (audioServer->quitRoom(roomId, uid)) {
-				response = "OK";
+				json body;
+				body["type"] = "RESPONSE_QUIT_ROOM";
+				body["ok"] = "OK";
+
+				response = body.dump();
 			}
 			else {
-				response = audioServer->lastError;
+				json body;
+				body["type"] = "RESPONSE_QUIT_ROOM";
+				body["ok"] = audioServer->lastError;
+
+				response = body.dump();
 			}
 			return;
 		}
